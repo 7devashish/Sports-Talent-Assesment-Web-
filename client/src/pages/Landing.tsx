@@ -9,9 +9,8 @@ import {
   Eye,
   ArrowUpRight,
   Cpu,
-  Sparkles,
-  Crosshair,
-  ShieldCheck
+  Layers,
+  Sparkles
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 
@@ -23,84 +22,41 @@ interface LandingProps {
 export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }) => {
   return (
     <div className="relative overflow-hidden bg-[#061220] text-slate-100 min-h-screen">
-      {/* ========================================================================= */}
-      {/* HERO SECTION WITH CINEMATIC HD SPORTS IMAGE & GIANT OVERLAY TYPOGRAPHY    */}
-      {/* ========================================================================= */}
-      <section className="relative w-full min-h-[92vh] flex flex-col justify-between overflow-hidden">
-        {/* Background HD Sports Image with Atmospheric Vignette */}
-        <div className="absolute inset-0 -z-10 overflow-hidden">
-          <img
-            src="/hero_sports.jpg"
-            alt="Sports Talent Athletes Arena"
-            className="w-full h-full object-cover object-center brightness-[0.75] contrast-[1.12] scale-[1.02]"
-          />
-          {/* Multi-layered cinematic gradients to blend with deep navy UI */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#061220] via-[#061220]/45 to-[#061220]/75" />
-          <div className="absolute inset-0 bg-radial from-transparent via-[#061220]/30 to-[#061220]/90" />
+      {/* Background ambient lighting */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-[500px] bg-[radial-gradient(ellipse_at_top,rgba(226,249,57,0.06),transparent_70%)] pointer-events-none -z-10" />
+
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
+        {/* Top Mini Badge */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-[#0b1c36]/60 backdrop-blur-md border border-white/15 text-xs font-bold text-slate-300 shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-[#e2f939] animate-pulse" />
+            <span>AI-Assisted Sports Talent Discovery Platform</span>
+          </div>
+          <span className="text-xs font-extrabold text-[#e2f939] uppercase tracking-wider hidden sm:inline">
+            CRICKET 2026 MVP
+          </span>
         </div>
 
-        {/* Top Tag & Live Status */}
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 flex items-center justify-between z-10">
-          <div className="flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-[#061220]/80 backdrop-blur-md border border-white/20 text-xs font-extrabold text-white shadow-lg">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#e2f939] animate-pulse" />
-            <span className="tracking-wide">AI-POWERED SPORTS TALENT DISCOVERY</span>
-          </div>
+        {/* Main Hero Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          {/* Left Column: Massive Impact Headline */}
+          <div className="lg:col-span-7 space-y-6">
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tight text-white leading-[0.95]">
+              <span className="text-[#e2f939]">SMARTER TALENT</span> <br />
+              ON EVERY PITCH
+            </h1>
 
-          <div className="hidden md:flex items-center gap-3 text-xs font-mono font-bold text-[#e2f939] bg-[#061220]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15">
-            <Crosshair className="w-3.5 h-3.5 animate-spin" />
-            <span>33-POINT POSE TRACKING ACTIVE</span>
-          </div>
-        </div>
+            <p className="text-base sm:text-lg text-slate-300 max-w-xl font-normal leading-relaxed">
+              Measure performance. Analyze body movement in real time with MediaPipe computer vision.
+              Discover high-potential young cricketers through multi-modal sports intelligence.
+            </p>
 
-        {/* Centerpiece: Giant Layered Overlay Typography */}
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 my-auto py-8 z-10">
-          <div className="relative select-none">
-            {/* Top Giant Text Line */}
-            <div className="text-[12vw] sm:text-[10vw] lg:text-[9.5rem] font-black uppercase tracking-tighter leading-[0.88] text-white drop-shadow-2xl">
-              MEASURE
-            </div>
-
-            {/* Bottom Giant Text Line with Volt-Yellow Accent */}
-            <div className="text-[12vw] sm:text-[10vw] lg:text-[9.5rem] font-black uppercase tracking-tighter leading-[0.88] text-[#e2f939] drop-shadow-2xl flex flex-wrap items-baseline gap-4 sm:gap-8">
-              <span>POTENTIAL</span>
-              <span className="text-white/25 text-[4vw] sm:text-[3vw] lg:text-5xl font-mono font-light tracking-normal border border-white/20 rounded-2xl px-4 py-1 self-center backdrop-blur-md bg-black/30 hidden sm:inline-block">
-                [@2026]
-              </span>
-            </div>
-
-            {/* Real-Time AI Tracking Reticle Overlay Tag */}
-            <div className="absolute top-[18%] right-[5%] sm:right-[15%] hidden md:flex items-center gap-3 bg-[#061220]/90 backdrop-blur-md px-4 py-2 rounded-2xl border border-[#e2f939]/40 shadow-2xl animate-pulse">
-              <div className="w-3 h-3 rounded-full bg-[#e2f939]" />
-              <div className="text-left font-mono text-[11px] font-bold">
-                <div className="text-white">BAT SPEED: 118 KM/H</div>
-                <div className="text-[#e2f939]">94% KINETIC SYNC</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Bottom Hero Content & CTAs Bar */}
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-12 z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-end bg-[#061220]/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-white/15 shadow-2xl shadow-black/80">
-            {/* Left: Summary Bio */}
-            <div className="lg:col-span-7 space-y-2">
-              <span className="text-[11px] font-extrabold uppercase tracking-widest text-[#e2f939] flex items-center gap-1.5 font-mono">
-                <Sparkles className="w-3.5 h-3.5" />
-                Data-Driven Athlete Profiling
-              </span>
-              <h2 className="text-xl sm:text-2xl font-black uppercase text-white tracking-tight">
-                Computer Vision Biomechanics Meets Scouting Intelligence
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-2xl">
-                Real-time posture stability, optical ball speed tracking, and explainable AI talent potential scores — identifying the next generation of youth athletes with scientific precision.
-              </p>
-            </div>
-
-            {/* Right: CTAs */}
-            <div className="lg:col-span-5 flex flex-wrap sm:flex-nowrap items-center justify-start lg:justify-end gap-3.5">
+            {/* CTAs */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               <button
                 onClick={onStartAssessment}
-                className="w-full sm:w-auto px-7 py-4 rounded-2xl font-black text-xs sm:text-sm uppercase tracking-wider bg-[#e2f939] text-[#061220] hover:bg-[#d4ed2e] hover:scale-105 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xl shadow-black/40"
+                className="px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider bg-[#e2f939] text-[#061220] hover:bg-[#d4ed2e] hover:scale-105 transition-all flex items-center gap-2.5 cursor-pointer shadow-lg shadow-black/30"
               >
                 <Zap className="w-4 h-4 fill-current" />
                 Start Assessment
@@ -109,19 +65,86 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
 
               <button
                 onClick={onExplore}
-                className="w-full sm:w-auto px-6 py-4 rounded-2xl font-bold text-xs sm:text-sm bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/20 flex items-center justify-center gap-2 transition-all cursor-pointer hover:scale-105"
+                className="px-6 py-4 rounded-xl font-bold text-sm bg-[#0b1c36]/60 hover:bg-[#11294d]/80 text-white backdrop-blur-md border border-white/15 hover:border-white/30 flex items-center gap-2 transition-all cursor-pointer hover:scale-105"
               >
                 <Eye className="w-4 h-4 text-[#e2f939]" />
-                Scout Hub
-                <ArrowUpRight className="w-4 h-4 opacity-80" />
+                Explore Scout Platform
+                <ArrowUpRight className="w-4 h-4 opacity-70" />
               </button>
+            </div>
+
+            {/* Quick Stats Highlights */}
+            <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10 max-w-md">
+              <div>
+                <div className="text-2xl sm:text-3xl font-black text-[#e2f939] font-mono">33</div>
+                <div className="text-[11px] text-slate-400 font-bold uppercase">Pose Keypoints</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-black text-white font-mono">140+</div>
+                <div className="text-[11px] text-slate-400 font-bold uppercase">km/h Speed CV</div>
+              </div>
+              <div>
+                <div className="text-2xl sm:text-3xl font-black text-white font-mono">100%</div>
+                <div className="text-[11px] text-slate-400 font-bold uppercase">Explainable AI</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Hero Visual with Real AI Tracking Bounding Box */}
+          <div className="lg:col-span-5 relative">
+            <div className="relative rounded-3xl overflow-hidden bg-[#0b1c36]/40 backdrop-blur-xl border border-white/15 aspect-[4/5] sm:aspect-square flex items-center justify-center group shadow-2xl shadow-black/40">
+              {/* Athlete Action Photo */}
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=80"
+                alt="Cricket Athlete"
+                className="w-full h-full object-cover grayscale contrast-125 opacity-75 group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#061220] via-transparent to-[#061220]/40" />
+
+              {/* Technical AI Bounding Box */}
+              <div className="absolute top-[20%] left-[22%] w-[56%] h-[52%] border-2 border-white/90 rounded-xl pointer-events-none">
+                {/* Crosshair Center */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 border border-white/60 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 bg-[#e2f939] rounded-full" />
+                </div>
+                {/* Top Left Tag */}
+                <div className="absolute -top-3 left-2 bg-black px-2 py-0.5 text-[9px] font-mono font-bold uppercase text-white tracking-widest border border-white/20">
+                  ATHLETE TRACKING
+                </div>
+                {/* Bottom Stats Badge */}
+                <div className="absolute -bottom-3 left-2 bg-[#061220]/95 backdrop-blur-md px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold text-[#e2f939] flex items-center gap-2 border border-white/20 shadow-md">
+                  <span>94% ALIGNMENT</span>
+                  <span className="text-white">|</span>
+                  <span className="text-white">88 POTENTIAL</span>
+                </div>
+              </div>
+
+              {/* Floating Action Badge Button (Top Right Yellow Arrow) */}
+              <div
+                onClick={onStartAssessment}
+                className="absolute top-4 right-4 w-12 h-12 rounded-full bg-[#e2f939] text-[#061220] flex items-center justify-center font-black shadow-lg cursor-pointer hover:scale-110 hover:rotate-12 transition-all duration-300"
+              >
+                <ArrowUpRight className="w-6 h-6 stroke-[3]" />
+              </div>
+
+              {/* Bottom Card Summary */}
+              <div className="absolute bottom-4 left-4 right-4 bg-[#061220]/90 backdrop-blur-md p-3.5 rounded-2xl border border-white/15 flex items-center justify-between text-xs">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Classified Archetype</div>
+                  <div className="font-extrabold text-white text-sm">Aggressive Top-Order Batter</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] uppercase font-bold text-slate-400">Bat Speed</div>
+                  <div className="font-mono font-extrabold text-[#e2f939]">118 km/h</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Volt-Yellow Marquee Athletic Tape Banner */}
-      <div className="w-full bg-[#e2f939] text-[#061220] py-2.5 overflow-hidden border-y border-black/20 my-2 shadow-sm select-none">
+      <div className="w-full bg-[#e2f939] text-[#061220] py-2.5 overflow-hidden border-y border-black/20 my-4 shadow-sm select-none">
         <div className="animate-marquee text-xs font-black uppercase tracking-widest flex items-center gap-8">
           <span>CRICKET TALENT ASSESSMENT</span>
           <span>✳</span>
@@ -145,9 +168,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 4 CORE FEATURE PILLARS WITH TRANSLUCENT GLASS & HOVER MICRO-ANIMATIONS     */}
-      {/* ========================================================================= */}
+      {/* 4 Feature Pillars Grid with Premium Translucency & Hover Animations */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
           <div>
@@ -173,6 +194,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
             onClick={onStartAssessment}
             className="group relative rounded-3xl p-6 bg-[#0b1c36]/40 hover:bg-[#11294d]/60 backdrop-blur-xl border border-white/10 hover:border-[#e2f939]/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 overflow-hidden flex flex-col justify-between"
           >
+            {/* Top specular highlight */}
             <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#e2f939]/40 transition-colors" />
 
             <div className="space-y-4">
