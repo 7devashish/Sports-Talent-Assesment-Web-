@@ -120,30 +120,6 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
                     Explore Scout Hub
                   </button>
                 </div>
-
-                {/* Social Proof */}
-                <div className="flex items-center gap-3 pt-2">
-                  <div className="flex -space-x-2 overflow-hidden">
-                    <img
-                      className="inline-block h-8 w-8 rounded-full ring-2 ring-[#061220] object-cover"
-                      src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100"
-                      alt="Athlete"
-                    />
-                    <img
-                      className="inline-block h-8 w-8 rounded-full ring-2 ring-[#061220] object-cover"
-                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100"
-                      alt="Athlete"
-                    />
-                    <img
-                      className="inline-block h-8 w-8 rounded-full ring-2 ring-[#061220] object-cover"
-                      src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100"
-                      alt="Scout"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-300 font-medium drop-shadow">
-                    Over <strong className="text-white font-bold">40,000+ athletes & coaches</strong> trust StarQ.
-                  </p>
-                </div>
               </motion.div>
             </motion.div>
           </div>
