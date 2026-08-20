@@ -45,38 +45,37 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
   return (
     <div className="relative overflow-hidden bg-[#061220] text-slate-100 min-h-screen">
       {/* ========================================================================= */}
-      {/* HERO SECTION WITH VISIBLE STADIUM BACKGROUND & ANIMATED TEXT OVERLAY      */}
+      {/* FULL-PAGE EDGE-TO-EDGE HERO SECTION WITH STADIUM IMAGE BACKGROUND         */}
       {/* ========================================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-12">
-        <div className="relative rounded-3xl overflow-hidden border border-white/20 min-h-[580px] sm:min-h-[640px] flex flex-col justify-between p-6 sm:p-12 lg:p-16 shadow-2xl shadow-black/80">
-          
-          {/* Real Stadium Image Background (Clearly Visible & High Contrast) */}
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <img
-              src={stadiumHeroImg}
-              alt="Cricket Stadium Arena Floodlights"
-              className="w-full h-full object-cover object-center brightness-[0.85] contrast-[1.12] scale-[1.01]"
-            />
-            {/* Smooth gradient on left for text legibility, keeping stadium pitch & floodlights clear on center-right */}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#061220]/95 via-[#061220]/60 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#061220]/90 via-transparent to-[#061220]/40" />
+      <section className="relative w-full min-h-[92vh] flex flex-col justify-between overflow-hidden">
+        {/* Full-width Stadium Background */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <img
+            src={stadiumHeroImg}
+            alt="Cricket Stadium Arena Floodlights"
+            className="w-full h-full object-cover object-center brightness-[0.88] contrast-[1.12]"
+          />
+          {/* Smooth directional gradients for optimal text contrast across all screen sizes */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#061220]/95 via-[#061220]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#061220] via-transparent to-[#061220]/50" />
+        </div>
+
+        {/* Top Tag Bar */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-8 sm:pt-10 flex items-center justify-between">
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#061220]/80 backdrop-blur-md border border-white/20 text-xs font-extrabold text-white shadow-sm">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e2f939] animate-pulse" />
+            <span>STARQ TALENT ENGINE</span>
           </div>
 
-          {/* Top Tag Bar */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#061220]/80 backdrop-blur-md border border-white/20 text-xs font-extrabold text-white shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#e2f939] animate-pulse" />
-              <span>STARQ TALENT ENGINE</span>
-            </div>
-
-            <div className="hidden sm:flex items-center gap-2 text-xs font-mono font-bold text-[#e2f939] bg-[#061220]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
-              <Crosshair className="w-3.5 h-3.5" />
-              <span>33-POINT BIOMECHANICS ACTIVE</span>
-            </div>
+          <div className="hidden sm:flex items-center gap-2 text-xs font-mono font-bold text-[#e2f939] bg-[#061220]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
+            <Crosshair className="w-3.5 h-3.5" />
+            <span>33-POINT BIOMECHANICS ACTIVE</span>
           </div>
+        </div>
 
-          {/* Animated Text Overlay (Headline, Subtitle, CTAs & Social Proof) */}
-          <div className="relative z-10 my-auto py-8 max-w-2xl lg:max-w-3xl">
+        {/* Animated Text Overlay (Headline, Subtitle & CTAs) */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 my-auto py-12">
+          <div className="max-w-2xl lg:max-w-3xl">
             <motion.div
               className="space-y-6"
               variants={containerVariants}
@@ -86,7 +85,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
               {/* Main Animated Headline */}
               <motion.h1
                 variants={itemVariants}
-                className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight drop-shadow-xl"
+                className="text-5xl sm:text-7xl lg:text-8xl font-extrabold text-white leading-[1.03] tracking-tight drop-shadow-2xl"
               >
                 Designed to <br />
                 <span className="text-[#e2f939]">Elevate Every</span> <br />
@@ -96,13 +95,13 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
               {/* Subtitle */}
               <motion.p
                 variants={itemVariants}
-                className="text-sm sm:text-base text-slate-200 font-normal leading-relaxed max-w-xl drop-shadow-md"
+                className="text-base sm:text-lg text-slate-200 font-normal leading-relaxed max-w-xl drop-shadow-md"
               >
                 Use computer vision, real-time MediaPipe biomechanics, and explainable AI to build multi-dimensional athlete profiles and scout youth cricket talent.
               </motion.p>
 
               {/* CTA Buttons */}
-              <motion.div variants={itemVariants} className="space-y-6 pt-2">
+              <motion.div variants={itemVariants} className="pt-2">
                 <div className="flex flex-wrap items-center gap-4">
                   <button
                     onClick={onStartAssessment}
@@ -123,9 +122,11 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
               </motion.div>
             </motion.div>
           </div>
+        </div>
 
-          {/* Bottom Micro-Pillars Strip */}
-          <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/15 text-xs">
+        {/* Bottom Micro-Pillars Strip */}
+        <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/15 text-xs">
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <Sparkles className="w-4 h-4 text-[#e2f939]" />
               <span className="font-bold">33-Keypoint Pose Tracking</span>
@@ -143,12 +144,11 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
               <span className="font-bold">Pro Scout Radar Analytics</span>
             </div>
           </div>
-
         </div>
-      </div>
+      </section>
 
       {/* Volt-Yellow Marquee Athletic Tape Banner */}
-      <div className="w-full bg-[#e2f939] text-[#061220] py-2.5 overflow-hidden border-y border-black/20 my-2 shadow-sm select-none">
+      <div className="w-full bg-[#e2f939] text-[#061220] py-2.5 overflow-hidden border-y border-black/20 shadow-sm select-none">
         <div className="animate-marquee text-xs font-black uppercase tracking-widest flex items-center gap-8">
           <span>CRICKET TALENT ASSESSMENT</span>
           <span>✳</span>
