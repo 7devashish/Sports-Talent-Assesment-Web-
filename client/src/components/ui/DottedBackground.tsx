@@ -16,7 +16,7 @@ export const DottedBackground: React.FC<DottedBackgroundProps> = ({
   glow = true
 }) => {
   return (
-    <div className={`absolute inset-0 pointer-events-none overflow-hidden select-none -z-10 ${className}`}>
+    <div className={`absolute inset-0 pointer-events-none overflow-hidden select-none z-0 ${className}`}>
       {/* SVG Pattern Dotted Grid */}
       <svg
         className="w-full h-full"

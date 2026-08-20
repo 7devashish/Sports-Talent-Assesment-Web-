@@ -176,12 +176,12 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
       {/* ========================================================================= */}
       {/* 4 CORE FEATURE PILLARS WITH DOTTED BACKGROUND & BREATHING SPACE           */}
       {/* ========================================================================= */}
-      <section className="relative overflow-hidden py-24 sm:py-32">
+      <section className="relative z-10 overflow-hidden py-24 sm:py-32 bg-[#061220]">
         {/* Dotted React Background Component */}
         <DottedBackground
           gap={28}
-          dotSize={1.6}
-          dotColor="rgba(255, 255, 255, 0.16)"
+          dotSize={1.8}
+          dotColor="rgba(255, 255, 255, 0.25)"
           glow={true}
         />
 
