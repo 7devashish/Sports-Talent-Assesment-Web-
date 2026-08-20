@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Space+Grotesk:wght@300..700&family=JetBrains+Mono:ital,wght@0,400..800;1,400..800&display=swap');
 @import "tailwindcss";
 
 @layer base {
@@ -8,12 +9,25 @@
     --color-accent-blue: #38bdf8;
   }
 
+  * {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.012em;
+  }
+
   body {
     background-color: #061220;
     color: #f8fafc;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
     overflow-x: hidden;
+    letter-spacing: -0.012em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace !important;
+    letter-spacing: normal;
   }
 
   #root {
@@ -32,15 +46,15 @@
 /* Crisp Sports-Tech Panels (No Neon Glows) */
 .glass-panel {
   background: rgba(11, 26, 48, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-panel-glow {
   background: rgba(11, 26, 48, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(226, 249, 57, 0.3);
 }
 
@@ -49,6 +63,7 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #f8fafc;
   transition: all 0.15s ease;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
 .glass-input:focus {
