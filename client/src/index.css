@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-bg-dark: #061220;
+    --color-card-dark: #0b1a30;
+    --color-accent-volt: #e2f939;
+    --color-accent-blue: #38bdf8;
+  }
+
+  body {
+    background-color: #061220;
+    color: #f8fafc;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    max-width: 100%;
+    border: none;
+    text-align: left;
+  }
+}
+
+/* Crisp Sports-Tech Panels (No Neon Glows) */
+.glass-panel {
+  background: rgba(11, 26, 48, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-glow {
+  background: rgba(11, 26, 48, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 249, 57, 0.3);
+}
+
+.glass-input {
+  background: rgba(8, 20, 38, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  transition: all 0.15s ease;
+}
+
+.glass-input:focus {
+  border-color: #e2f939;
+  outline: none;
+  box-shadow: 0 0 0 1px #e2f939;
+}
+
+/* Athletic Marquee Tape */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: marquee 25s linear infinite;
+}
+
+/* Custom modern scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #061220;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #172a45;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #233d63;
+}
