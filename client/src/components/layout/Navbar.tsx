@@ -41,14 +41,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <Zap className="w-5 h-5 fill-current" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-black tracking-tight text-white">
-                  STAR<span className="text-[#e2f939]">Q</span>
-                </span>
-                <span className="text-[10px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-full bg-[#e2f939]/15 text-[#e2f939] border border-[#e2f939]/30">
-                  CRICKET AI
-                </span>
-              </div>
+              <span className="text-xl font-black tracking-tight text-white">
+                STAR<span className="text-[#e2f939]">Q</span>
+              </span>
             </div>
           </div>
 
