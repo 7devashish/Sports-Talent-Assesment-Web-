@@ -36,7 +36,7 @@ export function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080c14] text-slate-100 flex flex-col selection:bg-cyan-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#061220] text-slate-100 flex flex-col selection:bg-[#e2f939] selection:text-[#061220]">
       <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <main className="flex-1">
