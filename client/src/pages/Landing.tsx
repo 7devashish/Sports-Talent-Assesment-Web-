@@ -14,6 +14,7 @@ import {
   Crosshair,
   ShieldCheck
 } from 'lucide-react';
+import { DottedBackground } from '../components/ui/DottedBackground';
 import stadiumHeroImg from '../assets/stadium_hero.jpg';
 
 interface LandingProps {
@@ -173,173 +174,184 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
       </div>
 
       {/* ========================================================================= */}
-      {/* 4 CORE FEATURE PILLARS WITH TRANSLUCENT GLASS & HOVER MICRO-ANIMATIONS     */}
+      {/* 4 CORE FEATURE PILLARS WITH DOTTED BACKGROUND & BREATHING SPACE           */}
       {/* ========================================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-          <div>
-            <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#e2f939] flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              CORE PILLARS
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black uppercase text-white tracking-tight mt-1">
-              Data-Driven Scouting Architecture
-            </h2>
+      <section className="relative overflow-hidden py-24 sm:py-32">
+        {/* Dotted React Background Component */}
+        <DottedBackground
+          gap={28}
+          dotSize={1.6}
+          dotColor="rgba(255, 255, 255, 0.16)"
+          glow={true}
+        />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+            <div>
+              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#e2f939] flex items-center gap-1.5 font-mono">
+                <Sparkles className="w-3.5 h-3.5" />
+                CORE PILLARS
+              </span>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black uppercase text-white tracking-tight mt-1">
+                Data-Driven Scouting Architecture
+              </h2>
+            </div>
+            <button
+              onClick={onExplore}
+              className="text-xs font-extrabold uppercase tracking-wider text-[#e2f939] hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+            >
+              View Scout Dashboard <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            onClick={onExplore}
-            className="text-xs font-extrabold uppercase tracking-wider text-[#e2f939] hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
-          >
-            View Scout Dashboard <ChevronRight className="w-4 h-4" />
-          </button>
+
+          {/* Grid with Generous Breathing Space (gap-8) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7 lg:gap-8">
+            {/* Card 1: CV Biomechanics Lab */}
+            <div
+              onClick={onStartAssessment}
+              className="group relative rounded-3xl p-7 sm:p-8 bg-[#0b1c36]/45 hover:bg-[#11294d]/65 backdrop-blur-xl border border-white/10 hover:border-[#e2f939]/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/60 overflow-hidden flex flex-col justify-between"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#e2f939]/40 transition-colors" />
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-[#e2f939] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                    <Video className="w-6 h-6" />
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#e2f939] group-hover:text-[#061220] group-hover:border-[#e2f939] transition-all duration-300">
+                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-[#e2f939] transition-colors">
+                    CV Biomechanics Lab
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed mt-2.5 font-normal">
+                    In-browser MediaPipe pose tracking measures stance width, balance, head stability, and rotational torque with no wearable hardware.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
+                <span className="font-mono">33 KEYPOINTS</span>
+                <span className="text-[#e2f939] uppercase flex items-center gap-1">
+                  Launch Lab <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Contextual Analytics */}
+            <div
+              onClick={onExplore}
+              className="group relative rounded-3xl p-7 sm:p-8 bg-[#0b1c36]/45 hover:bg-[#11294d]/65 backdrop-blur-xl border border-white/10 hover:border-white/40 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/60 overflow-hidden flex flex-col justify-between"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-white/50 transition-colors" />
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-white text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                    <BarChart3 className="w-6 h-6" />
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-[#061220] group-hover:border-white transition-all duration-300">
+                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-white transition-colors">
+                    Contextual Analytics
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed mt-2.5 font-normal">
+                    Phase-by-phase scoring (Powerplay, Middle, Death), pace vs spin splits, and pressure-performance normalization.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
+                <span className="font-mono">PHASE SPLITS</span>
+                <span className="text-white uppercase flex items-center gap-1">
+                  View Stats <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: Explainable AI */}
+            <div
+              onClick={onStartAssessment}
+              className="group relative rounded-3xl p-7 sm:p-8 bg-[#0b1c36]/45 hover:bg-[#11294d]/65 backdrop-blur-xl border border-white/10 hover:border-sky-400/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/60 overflow-hidden flex flex-col justify-between"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-sky-400/40 transition-colors" />
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-[#38bdf8] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                    <Cpu className="w-6 h-6" />
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#38bdf8] group-hover:text-[#061220] group-hover:border-[#38bdf8] transition-all duration-300">
+                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-sky-300 transition-colors">
+                    Explainable AI
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed mt-2.5 font-normal">
+                    Multi-dimensional Talent Potential Score (0-100) with transparent rationale, strengths, development areas, and drill prescriptions.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
+                <span className="font-mono">MODEL v1.4</span>
+                <span className="text-sky-300 uppercase flex items-center gap-1">
+                  AI Engine <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4: Scout Hub & Radar */}
+            <div
+              onClick={onExplore}
+              className="group relative rounded-3xl p-7 sm:p-8 bg-[#0b1c36]/45 hover:bg-[#11294d]/65 backdrop-blur-xl border border-white/10 hover:border-[#e2f939]/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/60 overflow-hidden flex flex-col justify-between"
+            >
+              <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#e2f939]/40 transition-colors" />
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-[#e2f939] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
+                    <TrendingUp className="w-6 h-6" />
+                  </div>
+
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#e2f939] group-hover:text-[#061220] group-hover:border-[#e2f939] transition-all duration-300">
+                    <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-[#e2f939] transition-colors">
+                    Scout Hub & Radar
+                  </h3>
+                  <p className="text-xs text-slate-300 leading-relaxed mt-2.5 font-normal">
+                    Multi-player head-to-head comparison radars, age/region filtering, and discovery tools for coaches and talent scouts.
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
+                <span className="font-mono">DISCOVERY</span>
+                <span className="text-[#e2f939] uppercase flex items-center gap-1">
+                  Scout Hub <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Card 1: CV Biomechanics Lab */}
-          <div
-            onClick={onStartAssessment}
-            className="group relative rounded-3xl p-6 bg-[#0b1c36]/40 hover:bg-[#11294d]/60 backdrop-blur-xl border border-white/10 hover:border-[#e2f939]/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#e2f939]/40 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#e2f939] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  <Video className="w-6 h-6" />
-                </div>
-
-                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#e2f939] group-hover:text-[#061220] group-hover:border-[#e2f939] transition-all duration-300">
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-[#e2f939] transition-colors">
-                  CV Biomechanics Lab
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mt-2 font-normal">
-                  In-browser MediaPipe pose tracking measures stance width, balance, head stability, and rotational torque with no wearable hardware.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-              <span className="font-mono">33 KEYPOINTS</span>
-              <span className="text-[#e2f939] uppercase flex items-center gap-1">
-                Launch Lab <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-
-          {/* Card 2: Contextual Analytics */}
-          <div
-            onClick={onExplore}
-            className="group relative rounded-3xl p-6 bg-[#0b1c36]/40 hover:bg-[#11294d]/60 backdrop-blur-xl border border-white/10 hover:border-white/40 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-white/50 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  <BarChart3 className="w-6 h-6" />
-                </div>
-
-                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-[#061220] group-hover:border-white transition-all duration-300">
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-white transition-colors">
-                  Contextual Analytics
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mt-2 font-normal">
-                  Phase-by-phase scoring (Powerplay, Middle, Death), pace vs spin splits, and pressure-performance normalization.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-              <span className="font-mono">PHASE SPLITS</span>
-              <span className="text-white uppercase flex items-center gap-1">
-                View Stats <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-
-          {/* Card 3: Explainable AI */}
-          <div
-            onClick={onStartAssessment}
-            className="group relative rounded-3xl p-6 bg-[#0b1c36]/40 hover:bg-[#11294d]/60 backdrop-blur-xl border border-white/10 hover:border-sky-400/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-sky-400/40 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#38bdf8] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  <Cpu className="w-6 h-6" />
-                </div>
-
-                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#38bdf8] group-hover:text-[#061220] group-hover:border-[#38bdf8] transition-all duration-300">
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-sky-300 transition-colors">
-                  Explainable AI
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mt-2 font-normal">
-                  Multi-dimensional Talent Potential Score (0-100) with transparent rationale, strengths, development areas, and drill prescriptions.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-              <span className="font-mono">MODEL v1.4</span>
-              <span className="text-sky-300 uppercase flex items-center gap-1">
-                AI Engine <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-
-          {/* Card 4: Scout Hub & Radar */}
-          <div
-            onClick={onExplore}
-            className="group relative rounded-3xl p-6 bg-[#0b1c36]/40 hover:bg-[#11294d]/60 backdrop-blur-xl border border-white/10 hover:border-[#e2f939]/50 transition-all duration-300 ease-out cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/50 overflow-hidden flex flex-col justify-between"
-          >
-            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:via-[#e2f939]/40 transition-colors" />
-
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-[#e2f939] text-[#061220] flex items-center justify-center font-black shadow-md group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300">
-                  <TrendingUp className="w-6 h-6" />
-                </div>
-
-                <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 group-hover:bg-[#e2f939] group-hover:text-[#061220] group-hover:border-[#e2f939] transition-all duration-300">
-                  <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-black uppercase text-white tracking-tight group-hover:text-[#e2f939] transition-colors">
-                  Scout Hub & Radar
-                </h3>
-                <p className="text-xs text-slate-300 leading-relaxed mt-2 font-normal">
-                  Multi-player head-to-head comparison radars, age/region filtering, and discovery tools for coaches and talent scouts.
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4 mt-4 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-              <span className="font-mono">DISCOVERY</span>
-              <span className="text-[#e2f939] uppercase flex items-center gap-1">
-                Scout Hub <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 };
