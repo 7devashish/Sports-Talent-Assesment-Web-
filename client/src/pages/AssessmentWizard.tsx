@@ -50,6 +50,27 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ onComplete }
     fetchCvData();
   }, [step, playerId]);
 
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      if (!playerId) return;
+      try {
+        const statsRes = await api.get(`/statistics/${playerId}`);
+        if (statsRes.data.batting) {
+          setFormData(prev => ({
+            ...prev,
+            matches: statsRes.data.batting.matches || prev.matches,
+            runs: statsRes.data.batting.runs || prev.runs,
+            battingAverage: statsRes.data.batting.batting_average || prev.battingAverage,
+            strikeRate: statsRes.data.batting.strike_rate || prev.strikeRate,
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to init wizard data:', err);
+      }
+    };
+    fetchInitialData();
+  }, [playerId]);
+
   const [formData, setFormData] = useState({
     sport: 'cricket',
     role: 'batter',
@@ -89,9 +110,23 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ onComplete }
     'Save Profile'
   ];
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step === 7) {
       setStep(8);
+      try {
+        // Save the stats entered in the wizard so the AI evaluates them
+        if (playerId) {
+          await api.post(`/statistics/${playerId}/batting`, {
+            matches: formData.matches,
+            runs: formData.runs,
+            battingAverage: formData.battingAverage,
+            strikeRate: formData.strikeRate
+          });
+        }
+      } catch (e) {
+        console.error("Failed to save wizard stats", e);
+      }
+
       setTimeout(async () => {
         try {
           const res = await api.get(`/reports/${playerId}`);
