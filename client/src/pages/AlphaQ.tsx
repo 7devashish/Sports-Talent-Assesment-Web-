@@ -131,7 +131,7 @@ export const AlphaQ: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-8rem)] flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(226,249,57,0.3)] overflow-hidden cursor-default">
-          <img src="/alpha-q-logo.jpg" alt="Alpha-Q Logo" className="w-full h-full object-cover scale-[1.35]" />
+          <img src="/alpha-q-logo.jpg" alt="Alpha-Q Logo" className="w-full h-full object-cover scale-[1.15]" />
         </div>
         <div>
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center gap-2">
@@ -144,8 +144,8 @@ export const AlphaQ: React.FC = () => {
       <div className="flex-1 bg-[#0b1b33] border border-white/10 rounded-2xl p-6 flex flex-col mb-4 overflow-y-auto">
         {messages.map((msg, index) => (
           <div key={index} className={`flex gap-4 mb-6 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden ${msg.role === 'user' ? 'bg-sky-500 text-white' : 'bg-transparent'}`}>
-              {msg.role === 'user' ? <User className="w-4 h-4" /> : <img src="/alpha-q-logo.jpg" alt="Alpha-Q" className="w-full h-full object-cover scale-[1.35]" />}
+            <div className={`w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden ${msg.role === 'user' ? 'bg-sky-500 text-white' : 'bg-transparent'}`}>
+              {msg.role === 'user' ? <User className="w-4 h-4" /> : <img src="/alpha-q-logo.jpg" alt="Alpha-Q" className="w-full h-full object-cover scale-[1.15]" />}
             </div>
             <div className={`${msg.role === 'user' ? 'bg-sky-500/20 border-sky-500/30' : 'bg-white/10 border-white/5'} rounded-2xl p-4 text-slate-200 text-sm border max-w-[80%] whitespace-pre-wrap ${msg.role === 'user' ? 'rounded-tr-none' : 'rounded-tl-none'}`}>
               {msg.content}
@@ -155,8 +155,8 @@ export const AlphaQ: React.FC = () => {
         
         {isLoading && (
           <div className="flex gap-4 mb-6">
-            <div className="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center overflow-hidden bg-transparent">
-              <img src="/alpha-q-logo.jpg" alt="Alpha-Q" className="w-full h-full object-cover scale-[1.35]" />
+            <div className="w-8 h-8 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden bg-transparent">
+              <img src="/alpha-q-logo.jpg" alt="Alpha-Q" className="w-full h-full object-cover scale-[1.15]" />
             </div>
             <div className="bg-white/10 rounded-2xl rounded-tl-none p-4 text-slate-200 text-sm border border-white/5 flex items-center gap-2">
               <Loader2 className="w-4 h-4 animate-spin text-[#e2f939]" /> Alpha-Q is thinking...

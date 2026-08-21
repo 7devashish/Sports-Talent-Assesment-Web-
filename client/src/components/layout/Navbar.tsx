@@ -130,8 +130,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   : 'text-slate-300 hover:text-white hover:bg-white/5'
               }`}
             >
-              <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
-                <img src="/alpha-q-logo.jpg" alt="AQ" className="w-full h-full object-cover scale-[1.35]" />
+              <div className="w-4 h-4 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                <img src="/alpha-q-logo.jpg" alt="AQ" className="w-full h-full object-cover scale-[1.15]" />
               </div>
               Alpha-Q
             </button>
