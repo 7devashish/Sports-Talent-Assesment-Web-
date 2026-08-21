@@ -227,7 +227,7 @@ CREATE TABLE IF NOT EXISTS talent_scores (
     secondary_archetype TEXT,
     archetype_similarity_pct REAL DEFAULT 85.0,
     
-    model_version TEXT DEFAULT 'v1.4-random-forest-ensemble',
+    model_version TEXT DEFAULT 'v2.0-kmeans-model',
     prediction_confidence REAL NOT NULL, -- 0-100%
     sample_size_matches INTEGER DEFAULT 0,
     
@@ -268,7 +268,8 @@ CREATE TABLE IF NOT EXISTS scout_watchlist (
     FOREIGN KEY (scout_user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (player_id) REFERENCES player_profiles(id) ON DELETE CASCADE
 );
-\ n - -   A I   A s s i s t a n t   C h a t   S e s s i o n s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ s e s s i o n s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         u s e r _ i d   T E X T   N O T   N U L L , \ n         t i t l e   T E X T , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         u p d a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( u s e r _ i d )   R E F E R E N C E S   u s e r s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n \ n - -   A I   A s s i s t a n t   C h a t   M e s s a g e s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ m e s s a g e s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         s e s s i o n _ i d   T E X T   N O T   N U L L , \ n         r o l e   T E X T   N O T   N U L L   C H E C K ( r o l e   I N   ( ' u s e r ' ,   ' m o d e l ' ) ) , \ n         c o n t e n t   T E X T   N O T   N U L L , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( s e s s i o n _ i d )   R E F E R E N C E S   c h a t _ s e s s i o n s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n  
+\ n - -   A I   A s s i s t a n t   C h a t   S e s s i o n s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ s e s s i o n s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         u s e r _ i d   T E X T   N O T   N U L L , \ n         t i t l e   T E X T , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         u p d a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( u s e r _ i d )   R E F E R E N C E S   u s e r s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n \ n - -   A I   A s s i s t a n t   C h a t   M e s s a g e s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ m e s s a g e s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         s e s s i o n _ i d   T E X T   N O T   N U L L , \ n         r o l e   T E X T   N O T   N U L L   C H E C K ( r o l e   I N   ( ' u s e r ' ,   ' m o d e l ' ) ) , \ n         c o n t e n t   T E X T   N O T   N U L L , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( s e s s i o n _ i d )   R E F E R E N C E S   c h a t _ s e s s i o n s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n 
+ 
  
 -- Cricbuzz Integration Normalized Tables
 

@@ -479,7 +479,7 @@ async function evaluatePlayerTalent({
         primary_archetype: archetypeInfo.primary,
         secondary_archetype: archetypeInfo.secondary,
         archetype_similarity_pct: archetypeInfo.similarity,
-        model_version: 'v1.4-random-forest-ensemble',
+        model_version: 'v2.0-kmeans-model',
         prediction_confidence: confidence,
         sample_size_matches: sampleMatches,
         strengths,
