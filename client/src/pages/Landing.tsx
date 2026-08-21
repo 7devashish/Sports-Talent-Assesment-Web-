@@ -70,7 +70,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
 
           <div className="hidden sm:flex items-center gap-2 text-xs font-mono font-bold text-[#e2f939] bg-[#061220]/80 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 shadow-sm">
             <Crosshair className="w-3.5 h-3.5" />
-            <span>33-POINT BIOMECHANICS ACTIVE</span>
+            <span>CV BIOMECHANICS ENGINE ACTIVE</span>
           </div>
         </div>
 
@@ -129,20 +129,20 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
         <div className="relative z-10 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pb-10 sm:pb-12">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-6 border-t border-white/15 text-xs">
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
-              <Sparkles className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">33-Keypoint Pose Tracking</span>
+              <TrendingUp className="w-4 h-4 text-[#e2f939]" />
+              <span className="font-bold">Athlete Comparison Radar</span>
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <Zap className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">140+ km/h Optical Speed</span>
+              <span className="font-bold">CV Biomechanics Analysis</span>
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <Activity className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">Explainable AI Scores</span>
+              <span className="font-bold">AI Stats Analysis</span>
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <ShieldCheck className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">Pro Scout Radar Analytics</span>
+              <span className="font-bold">Explainable AI Scores</span>
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
           <span>✳</span>
           <span>REAL-TIME POSE BIOMECHANICS</span>
           <span>✳</span>
-          <span>BALL SPEED TRACKING (140+ KM/H)</span>
+          <span>AI STATS ANALYSIS</span>
           <span>✳</span>
           <span>TALENT POTENTIAL SCORING</span>
           <span>✳</span>
@@ -167,7 +167,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
           <span>✳</span>
           <span>REAL-TIME POSE BIOMECHANICS</span>
           <span>✳</span>
-          <span>BALL SPEED TRACKING (140+ KM/H)</span>
+          <span>AI STATS ANALYSIS</span>
           <span>✳</span>
           <span>TALENT POTENTIAL SCORING</span>
         </div>
@@ -235,7 +235,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
               </div>
 
               <div className="pt-5 mt-6 border-t border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-400 group-hover:text-white transition-colors">
-                <span className="font-mono">33 KEYPOINTS</span>
+                <span className="font-mono">MOTION ANALYSIS</span>
                 <span className="text-[#e2f939] uppercase flex items-center gap-1">
                   Launch Lab <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </span>
