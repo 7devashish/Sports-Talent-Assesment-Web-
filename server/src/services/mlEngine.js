@@ -314,21 +314,27 @@ async function determineArchetype(player, batting, bowling, athleticScore, techn
         }
         
         // Fallback rule-based
-        const sr = batting ? batting.strike_rate : 0;
-        const avg = batting ? batting.batting_average : 0;
+        const sr = batting ? Number(batting.strike_rate) : 0;
+        const avg = batting ? Number(batting.batting_average) : 0;
 
-        if (sr > 145) {
+        if (sr >= 140 && avg >= 35) {
             candidates.push({ name: 'Power Finisher', similarity: 92 });
-            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 78 });
-        } else if (avg > 45) {
-            candidates.push({ name: 'Technical Opener / Anchor', similarity: 89 });
-            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 75 });
-        } else if (sr > 130 && avg > 35) {
+            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 85 });
+        } else if (sr >= 145) {
+            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 90 });
+            candidates.push({ name: 'Power Finisher', similarity: 82 });
+        } else if (avg >= 45) {
+            candidates.push({ name: 'Technical Opener / Anchor', similarity: 94 });
+            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 80 });
+        } else if (sr >= 130 && avg >= 30) {
+            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 88 });
+            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 75 });
+        } else if (avg >= 35) {
             candidates.push({ name: 'Middle-Order Stabilizer', similarity: 85 });
-            candidates.push({ name: 'Technical Opener / Anchor', similarity: 70 });
+            candidates.push({ name: 'Technical Opener / Anchor', similarity: 78 });
         } else {
-            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 72 });
-            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 65 });
+            candidates.push({ name: 'Developing Batter', similarity: 75 });
+            candidates.push({ name: 'Utility Batter', similarity: 70 });
         }
     } else if (role === 'fast_bowler') {
         // High technical score for bowler now implies high CV estimated speed
@@ -396,14 +402,13 @@ async function evaluatePlayerTalent({
     const developmentScore = calculateDevelopmentScore(progressHistory, player.age);
 
     // Weighted Overall Talent Potential formula
-    // Removing dummy profile value weights and focusing heavily on live CV data and Athletic Tests.
-    // The drive feature stats and balling speeds heavily dictate the technical score now.
+    // Re-prioritizing manual match stats heavily based on user feedback
     const overallTalentPotential = Math.round(
-        (technicalScore * 0.45) + // Drive mechanics and Ball speeds (Real CV data)
-        (athleticScore * 0.35) +  // Physical jumps, etc
-        (consistencyScore * 0.10) +
-        (performanceScore * 0.05) + // Deprioritize static dummy match stats
-        (developmentScore * 0.05)
+        (performanceScore * 0.40) + // 40% Match Stats
+        (technicalScore * 0.30) +   // 30% CV Biomechanics
+        (athleticScore * 0.15) +    // 15% Physical Tests
+        (consistencyScore * 0.10) + // 10% Consistency
+        (developmentScore * 0.05)   // 5% Age/Trajectory
     );
 
     let talentTier = 'Emerging';
