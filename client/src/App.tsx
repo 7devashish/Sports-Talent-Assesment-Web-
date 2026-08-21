@@ -20,7 +20,7 @@ export function App() {
   const [currentTab, setCurrentTab] = useState<string>('landing');
   const [inspectPlayerId, setInspectPlayerId] = useState<string | null>(null);
   const [compareIds, setCompareIds] = useState<string[]>([]);
-  const { user, fetchCurrentUser } = useStore();
+  const { user, currentProfile, fetchCurrentUser } = useStore();
 
   useEffect(() => {
     fetchCurrentUser();

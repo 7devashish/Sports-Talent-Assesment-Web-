@@ -67,8 +67,8 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const poseRef = useRef<Pose | null>(null);
-  const cameraRef = useRef<Camera | null>(null);
+  const poseRef = useRef<any | null>(null);
+  const cameraRef = useRef<any | null>(null);
   const isTestingRef = useRef(false);
   const latestLandmarksRef = useRef<any>(null);
   const testIntervalRef = useRef<any>(null);
@@ -230,7 +230,7 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
         lastApiCallTime.current = now;
         try {
           // Format landmarks for backend
-          const landmarksForBackend = results.poseLandmarks.map(lm => ({
+          const landmarksForBackend = results.poseLandmarks.map((lm: any) => ({
             x: lm.x, y: lm.y, z: lm.z, visibility: lm.visibility
           }));
 
@@ -283,7 +283,7 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
   const startCamera = useCallback(async () => {
     try {
       const pose = new Pose({
-        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+        locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
       });
 
       pose.setOptions({
