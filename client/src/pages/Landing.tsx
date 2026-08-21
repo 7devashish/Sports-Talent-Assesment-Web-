@@ -134,15 +134,15 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <Zap className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">140+ km/h Optical Speed</span>
+              <span className="font-bold">CV Biomechanics Analysis</span>
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <Activity className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">Explainable AI Scores</span>
+              <span className="font-bold">AI Stats Analysation</span>
             </div>
             <div className="flex items-center gap-2 text-slate-200 drop-shadow">
               <ShieldCheck className="w-4 h-4 text-[#e2f939]" />
-              <span className="font-bold">Pro Scout Radar Analytics</span>
+              <span className="font-bold">Explainable AI Scores</span>
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
           <span>✳</span>
           <span>REAL-TIME POSE BIOMECHANICS</span>
           <span>✳</span>
-          <span>BALL SPEED TRACKING (140+ KM/H)</span>
+          <span>AI STATS ANALYSATION</span>
           <span>✳</span>
           <span>TALENT POTENTIAL SCORING</span>
           <span>✳</span>
@@ -167,7 +167,7 @@ export const Landing: React.FC<LandingProps> = ({ onStartAssessment, onExplore }
           <span>✳</span>
           <span>REAL-TIME POSE BIOMECHANICS</span>
           <span>✳</span>
-          <span>BALL SPEED TRACKING (140+ KM/H)</span>
+          <span>AI STATS ANALYSATION</span>
           <span>✳</span>
           <span>TALENT POTENTIAL SCORING</span>
         </div>
