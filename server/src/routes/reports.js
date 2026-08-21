@@ -24,7 +24,7 @@ router.get('/:playerId', async (req, res) => {
 
         // If no score exists yet or recalculation needed, generate on the fly
         if (!talentScore) {
-            const evalResult = evaluatePlayerTalent({
+            const evalResult = await evaluatePlayerTalent({
                 player,
                 batting,
                 bowling,

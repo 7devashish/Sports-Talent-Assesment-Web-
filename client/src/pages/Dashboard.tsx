@@ -37,7 +37,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
   const [reportData, setReportData] = useState<TalentReportResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   useEffect(() => {
     async function loadReport() {

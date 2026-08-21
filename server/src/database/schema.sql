@@ -270,3 +270,110 @@ CREATE TABLE IF NOT EXISTS scout_watchlist (
 );
 \ n - -   A I   A s s i s t a n t   C h a t   S e s s i o n s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ s e s s i o n s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         u s e r _ i d   T E X T   N O T   N U L L , \ n         t i t l e   T E X T , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         u p d a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( u s e r _ i d )   R E F E R E N C E S   u s e r s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n \ n - -   A I   A s s i s t a n t   C h a t   M e s s a g e s \ n C R E A T E   T A B L E   I F   N O T   E X I S T S   c h a t _ m e s s a g e s   ( \ n         i d   T E X T   P R I M A R Y   K E Y , \ n         s e s s i o n _ i d   T E X T   N O T   N U L L , \ n         r o l e   T E X T   N O T   N U L L   C H E C K ( r o l e   I N   ( ' u s e r ' ,   ' m o d e l ' ) ) , \ n         c o n t e n t   T E X T   N O T   N U L L , \ n         c r e a t e d _ a t   D A T E T I M E   D E F A U L T   C U R R E N T _ T I M E S T A M P , \ n         F O R E I G N   K E Y   ( s e s s i o n _ i d )   R E F E R E N C E S   c h a t _ s e s s i o n s ( i d )   O N   D E L E T E   C A S C A D E \ n ) ; \ n  
  
+-- Cricbuzz Integration Normalized Tables
+
+CREATE TABLE IF NOT EXISTS series (
+    id TEXT PRIMARY KEY,
+    cricbuzz_series_id TEXT,
+    name TEXT,
+    start_date TEXT,
+    end_date TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS teams (
+    id TEXT PRIMARY KEY,
+    cricbuzz_team_id TEXT,
+    name TEXT,
+    short_name TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS venues (
+    id TEXT PRIMARY KEY,
+    cricbuzz_venue_id TEXT,
+    name TEXT,
+    city TEXT,
+    country TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS matches (
+    id TEXT PRIMARY KEY,
+    cricbuzz_match_id TEXT UNIQUE,
+    series_id TEXT,
+    venue_id TEXT,
+    match_format TEXT,
+    start_time TEXT,
+    status TEXT,
+    team1_id TEXT,
+    team2_id TEXT,
+    FOREIGN KEY (series_id) REFERENCES series(id),
+    FOREIGN KEY (venue_id) REFERENCES venues(id),
+    FOREIGN KEY (team1_id) REFERENCES teams(id),
+    FOREIGN KEY (team2_id) REFERENCES teams(id)
+);
+
+CREATE TABLE IF NOT EXISTS innings (
+    id TEXT PRIMARY KEY,
+    match_id TEXT,
+    innings_number INTEGER,
+    batting_team_id TEXT,
+    bowling_team_id TEXT,
+    runs INTEGER,
+    wickets INTEGER,
+    overs REAL,
+    declared INTEGER DEFAULT 0,
+    FOREIGN KEY (match_id) REFERENCES matches(id),
+    FOREIGN KEY (batting_team_id) REFERENCES teams(id),
+    FOREIGN KEY (bowling_team_id) REFERENCES teams(id)
+);
+
+CREATE TABLE IF NOT EXISTS match_batting_performances (
+    id TEXT PRIMARY KEY,
+    player_id TEXT,
+    match_id TEXT,
+    innings_id TEXT,
+    cricbuzz_player_id TEXT,
+    runs INTEGER DEFAULT 0,
+    balls_faced INTEGER DEFAULT 0,
+    fours INTEGER DEFAULT 0,
+    sixes INTEGER DEFAULT 0,
+    strike_rate REAL DEFAULT 0.0,
+    how_out TEXT,
+    FOREIGN KEY (player_id) REFERENCES player_profiles(id),
+    FOREIGN KEY (match_id) REFERENCES matches(id),
+    FOREIGN KEY (innings_id) REFERENCES innings(id)
+);
+
+CREATE TABLE IF NOT EXISTS match_bowling_performances (
+    id TEXT PRIMARY KEY,
+    player_id TEXT,
+    match_id TEXT,
+    innings_id TEXT,
+    cricbuzz_player_id TEXT,
+    overs REAL DEFAULT 0.0,
+    maidens INTEGER DEFAULT 0,
+    runs_conceded INTEGER DEFAULT 0,
+    wickets INTEGER DEFAULT 0,
+    economy_rate REAL DEFAULT 0.0,
+    wides INTEGER DEFAULT 0,
+    no_balls INTEGER DEFAULT 0,
+    FOREIGN KEY (player_id) REFERENCES player_profiles(id),
+    FOREIGN KEY (match_id) REFERENCES matches(id),
+    FOREIGN KEY (innings_id) REFERENCES innings(id)
+);
+
+CREATE TABLE IF NOT EXISTS match_fielding_performances (
+    id TEXT PRIMARY KEY,
+    player_id TEXT,
+    match_id TEXT,
+    innings_id TEXT,
+    cricbuzz_player_id TEXT,
+    catches INTEGER DEFAULT 0,
+    run_outs INTEGER DEFAULT 0,
+    stumpings INTEGER DEFAULT 0,
+    FOREIGN KEY (player_id) REFERENCES player_profiles(id),
+    FOREIGN KEY (match_id) REFERENCES matches(id),
+    FOREIGN KEY (innings_id) REFERENCES innings(id)
+);

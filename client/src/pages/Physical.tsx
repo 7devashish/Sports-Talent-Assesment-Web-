@@ -12,7 +12,7 @@ import confetti from 'canvas-confetti';
 
 export const Physical: React.FC = () => {
   const { user, currentProfile } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [tests, setTests] = useState<any[]>([]);
   const [modalOpen, setModalOpen] = useState(false);

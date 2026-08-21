@@ -30,6 +30,14 @@ export const TalentRadarChart: React.FC<TalentRadarChartProps> = ({
   comparePlayerName,
   height = 320,
 }) => {
+  if (!data || data.length === 0) {
+    return (
+      <div className="w-full flex items-center justify-center text-slate-500 text-sm" style={{ height }}>
+        No radar data available.
+      </div>
+    );
+  }
+
   return (
     <div className="w-full" style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
@@ -41,7 +49,9 @@ export const TalentRadarChart: React.FC<TalentRadarChartProps> = ({
           />
           <PolarRadiusAxis
             angle={30}
+            type="number"
             domain={[0, 100]}
+            tickCount={6}
             tick={{ fill: '#475569', fontSize: 10 }}
             axisLine={false}
           />

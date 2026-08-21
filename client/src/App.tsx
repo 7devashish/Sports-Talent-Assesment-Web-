@@ -43,7 +43,13 @@ export function App() {
       <main className="flex-1">
         {currentTab === 'landing' && (
           <Landing
-            onStartAssessment={() => setCurrentTab('assessment-wizard')}
+            onStartAssessment={() => {
+              if (user || currentProfile) {
+                setCurrentTab('assessment-wizard');
+              } else {
+                setCurrentTab('register');
+              }
+            }}
             onExplore={() => setCurrentTab('scout-hub')}
           />
         )}

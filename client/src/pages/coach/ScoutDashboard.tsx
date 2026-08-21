@@ -5,7 +5,8 @@ import {
   ChevronRight,
   TrendingUp,
   Bookmark,
-  Layers
+  Layers,
+  User
 } from 'lucide-react';
 import { GlassCard } from '../../components/ui/GlassCard';
 import { ScoreBadge } from '../../components/ui/ScoreBadge';
@@ -23,7 +24,7 @@ export const ScoutDashboard: React.FC<ScoutDashboardProps> = ({
   const [players, setPlayers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
-  const [watchlist, setWatchlist] = useState<string[]>(['p_rahul', 'p_vikram']);
+  const [watchlist, setWatchlist] = useState<string[]>([]);
 
   // Filters
   const [roleFilter, setRoleFilter] = useState('all');
@@ -249,12 +250,18 @@ export const ScoutDashboard: React.FC<ScoutDashboardProps> = ({
                     {/* Athlete Name & Photo */}
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <img
-                          src={p.profile_photo_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80'}
-                          alt={p.full_name}
-                          className="w-9 h-9 rounded-full object-cover border border-white/20"
-                        />
-                        <div>
+                        {p.profile_photo_url ? (
+                          <img
+                            src={p.profile_photo_url}
+                            alt={p.full_name}
+                            className="w-9 h-9 rounded-full object-cover border border-white/20"
+                          />
+                        ) : (
+                          <div className="w-9 h-9 rounded-full bg-[#061220] border border-white/20 flex items-center justify-center flex-shrink-0">
+                            <User className="w-4 h-4 text-slate-400" />
+                          </div>
+                        )}
+                        <div className="flex flex-col">
                           <div className="font-bold text-white text-sm hover:text-[#e2f939] cursor-pointer" onClick={() => onInspectPlayer(p.id)}>
                             {p.full_name}
                           </div>

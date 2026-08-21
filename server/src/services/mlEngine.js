@@ -176,10 +176,11 @@ function calculateAthleticScore(physicalTests = []) {
 /**
  * Calculates Technical Skill Score from CV biomechanics sessions
  */
-function calculateTechnicalScore(cvAssessments = []) {
+function calculateTechnicalScore(cvAssessments = [], role = 'batter') {
     if (!cvAssessments || cvAssessments.length === 0) return 76; // baseline default
 
     let totalPosture = 0, totalBalance = 0, totalHip = 0, totalShoulder = 0, totalHead = 0, totalEff = 0;
+    let maxSpeed = 0;
     const n = cvAssessments.length;
 
     cvAssessments.forEach(cv => {
@@ -189,6 +190,10 @@ function calculateTechnicalScore(cvAssessments = []) {
         totalShoulder += cv.shoulder_rotation_score || 75;
         totalHead += cv.head_stability_score || 75;
         totalEff += cv.movement_efficiency_score || 75;
+        
+        if (cv.estimated_speed_kmh > maxSpeed) {
+            maxSpeed = cv.estimated_speed_kmh;
+        }
     });
 
     const avgPosture = totalPosture / n;
@@ -198,8 +203,16 @@ function calculateTechnicalScore(cvAssessments = []) {
     const avgHead = totalHead / n;
     const avgEff = totalEff / n;
 
-    const weightedScore = (avgPosture * 0.15) + (avgBalance * 0.20) + (avgHip * 0.15) +
-                          (avgShoulder * 0.15) + (avgHead * 0.20) + (avgEff * 0.15);
+    let weightedScore = 75;
+
+    if (role.includes('bowler')) {
+        // For bowlers, prioritize their max optical speed tracked in CV and rotational biomechanics
+        const speedScore = maxSpeed > 0 ? normalize(maxSpeed, 90, 145) : 75;
+        weightedScore = (speedScore * 0.40) + (avgShoulder * 0.20) + (avgHip * 0.15) + (avgBalance * 0.15) + (avgEff * 0.10);
+    } else {
+        // For batters (drive feature), prioritize head stability, posture, and balance
+        weightedScore = (avgHead * 0.30) + (avgPosture * 0.25) + (avgBalance * 0.20) + (avgHip * 0.15) + (avgEff * 0.10);
+    }
 
     return Math.min(99, Math.max(30, Math.round(weightedScore)));
 }
@@ -258,37 +271,72 @@ function calculateDevelopmentScore(progressHistory = [], playerAge = 18) {
 /**
  * Matches player against cricketing archetypes
  */
-function determineArchetype(player, batting, bowling, athleticScore, technicalScore) {
+async function determineArchetype(player, batting, bowling, athleticScore, technicalScore) {
     const role = player.primary_role;
     let candidates = [];
 
-    if (role === 'batter') {
-        const sr = batting ? batting.strike_rate : 130;
-        const avg = batting ? batting.batting_average : 35;
-        const boundaryPct = batting ? batting.boundary_percentage : 16;
+    // Let's call the Python K-Means model for batters
+    if (role === 'batter' && batting) {
+        try {
+            // Provide features in order or as a dict for python to extract
+            const features = {
+                matches: batting.matches || 0,
+                innings: batting.innings || 0,
+                total_runs: batting.runs || 0,
+                highest_score: batting.highest_score || 0,
+                batting_avg: batting.batting_average || 0,
+                strike_rate: batting.strike_rate || 0,
+                fours: batting.fours || 0,
+                sixes: batting.sixes || 0,
+                fifties: 0,
+                hundreds: 0,
+                ducks: 0,
+                not_outs: batting.not_outs || 0
+            };
+            
+            const pythonUrl = process.env.PYTHON_SERVICE_URL || 'http://localhost:8001';
+            const response = await fetch(`${pythonUrl}/predict-archetype`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ features: features })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success' && data.result) {
+                return {
+                    primary: data.result.archetype_name,
+                    secondary: 'Utility Batter',
+                    similarity: 90
+                };
+            }
+        } catch (err) {
+            console.error("Failed to fetch K-Means archetype, falling back to rule-based:", err);
+        }
+        
+        // Fallback rule-based
+        const sr = batting ? batting.strike_rate : 0;
+        const avg = batting ? batting.batting_average : 0;
 
-        if (sr >= 142 && boundaryPct >= 18) {
-            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 89 });
-            candidates.push({ name: 'Power Finisher', similarity: 78 });
-            candidates.push({ name: 'Technical Opener / Anchor', similarity: 64 });
-        } else if (avg >= 42) {
-            candidates.push({ name: 'Technical Opener / Anchor', similarity: 91 });
-            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 82 });
-            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 67 });
+        if (sr > 145) {
+            candidates.push({ name: 'Power Finisher', similarity: 92 });
+            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 78 });
+        } else if (avg > 45) {
+            candidates.push({ name: 'Technical Opener / Anchor', similarity: 89 });
+            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 75 });
+        } else if (sr > 130 && avg > 35) {
+            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 85 });
+            candidates.push({ name: 'Technical Opener / Anchor', similarity: 70 });
         } else {
-            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 86 });
-            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 74 });
-            candidates.push({ name: 'Power Finisher', similarity: 68 });
+            candidates.push({ name: 'Middle-Order Stabilizer', similarity: 72 });
+            candidates.push({ name: 'Aggressive Top-Order Batter', similarity: 65 });
         }
     } else if (role === 'fast_bowler') {
-        const speed = bowling ? bowling.average_speed_kmh : 125;
-        const econ = bowling ? bowling.economy_rate : 6.8;
-
-        if (speed >= 132 || athleticScore >= 88) {
+        // High technical score for bowler now implies high CV estimated speed
+        if (technicalScore >= 85 || athleticScore >= 88) {
             candidates.push({ name: 'Express Fast Bowler', similarity: 92 });
             candidates.push({ name: 'Death Overs Specialist', similarity: 79 });
             candidates.push({ name: 'New-Ball Swing Specialist', similarity: 71 });
-        } else if (econ <= 6.0) {
+        } else if (technicalScore >= 75) {
             candidates.push({ name: 'New-Ball Swing Specialist', similarity: 88 });
             candidates.push({ name: 'Death Overs Specialist', similarity: 81 });
             candidates.push({ name: 'Express Fast Bowler', similarity: 68 });
@@ -298,8 +346,7 @@ function determineArchetype(player, batting, bowling, athleticScore, technicalSc
             candidates.push({ name: 'Express Fast Bowler', similarity: 70 });
         }
     } else if (role === 'spin_bowler') {
-        const econ = bowling ? bowling.economy_rate : 5.8;
-        if (econ <= 5.2) {
+        if (technicalScore >= 80) {
             candidates.push({ name: 'Control / Defensive Spinner', similarity: 90 });
             candidates.push({ name: 'Attacking Mystery Spinner', similarity: 76 });
         } else {
@@ -307,7 +354,7 @@ function determineArchetype(player, batting, bowling, athleticScore, technicalSc
             candidates.push({ name: 'Control / Defensive Spinner', similarity: 79 });
         }
     } else if (role === 'all_rounder') {
-        if (player.bowling_style && player.bowling_style.includes('fast')) {
+        if (athleticScore >= 85) {
             candidates.push({ name: 'Explosive Pace All-Rounder', similarity: 91 });
             candidates.push({ name: 'Dynamic Spin All-Rounder', similarity: 65 });
         } else {
@@ -333,7 +380,7 @@ function determineArchetype(player, batting, bowling, athleticScore, technicalSc
 /**
  * Evaluates Full Talent Profile
  */
-function evaluatePlayerTalent({
+async function evaluatePlayerTalent({
     player,
     batting,
     bowling,
@@ -344,18 +391,19 @@ function evaluatePlayerTalent({
 }) {
     const { score: performanceScore } = calculatePerformanceScore(player, batting, bowling, fielding);
     const athleticScore = calculateAthleticScore(physicalTests);
-    const technicalScore = calculateTechnicalScore(cvAssessments);
+    const technicalScore = calculateTechnicalScore(cvAssessments, player.primary_role);
     const consistencyScore = calculateConsistencyScore(player, batting, bowling, physicalTests);
     const developmentScore = calculateDevelopmentScore(progressHistory, player.age);
 
     // Weighted Overall Talent Potential formula
-    // Gives significant weight to youth potential & biomechanics
+    // Removing dummy profile value weights and focusing heavily on live CV data and Athletic Tests.
+    // The drive feature stats and balling speeds heavily dictate the technical score now.
     const overallTalentPotential = Math.round(
-        (performanceScore * 0.28) +
-        (athleticScore * 0.24) +
-        (technicalScore * 0.22) +
-        (consistencyScore * 0.12) +
-        (developmentScore * 0.14)
+        (technicalScore * 0.45) + // Drive mechanics and Ball speeds (Real CV data)
+        (athleticScore * 0.35) +  // Physical jumps, etc
+        (consistencyScore * 0.10) +
+        (performanceScore * 0.05) + // Deprioritize static dummy match stats
+        (developmentScore * 0.05)
     );
 
     let talentTier = 'Emerging';
@@ -364,7 +412,7 @@ function evaluatePlayerTalent({
     else if (overallTalentPotential >= 72) talentTier = 'Advanced';
     else if (overallTalentPotential >= 62) talentTier = 'Developing';
 
-    const archetypeInfo = determineArchetype(player, batting, bowling, athleticScore, technicalScore);
+    const archetypeInfo = await determineArchetype(player, batting, bowling, athleticScore, technicalScore);
 
     // Calculate assessment confidence
     const sampleMatches = (batting ? batting.matches : 0) + (bowling ? bowling.matches : 0);
@@ -450,3 +498,4 @@ module.exports = {
     COMPETITION_MULTIPLIERS,
     ARCHETYPES
 };
+

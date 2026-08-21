@@ -14,8 +14,8 @@ interface CompareProps {
 }
 
 export const Compare: React.FC<CompareProps> = ({ initialPlayerIds }) => {
-  const [player1Id, setPlayer1Id] = useState(initialPlayerIds?.[0] || 'p_rahul');
-  const [player2Id, setPlayer2Id] = useState(initialPlayerIds?.[1] || 'p_vikram');
+  const [player1Id, setPlayer1Id] = useState(initialPlayerIds?.[0]);
+  const [player2Id, setPlayer2Id] = useState(initialPlayerIds?.[1]);
   const [allPlayers, setAllPlayers] = useState<any[]>([]);
   const [comparisonData, setComparisonData] = useState<any[]>([]);
 

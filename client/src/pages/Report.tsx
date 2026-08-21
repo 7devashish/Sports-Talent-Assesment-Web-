@@ -24,7 +24,7 @@ interface ReportProps {
 
 export const Report: React.FC<ReportProps> = ({ onBack }) => {
   const { user, currentProfile } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [reportData, setReportData] = useState<TalentReportResponse | null>(null);
   const [loading, setLoading] = useState(true);

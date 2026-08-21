@@ -111,9 +111,10 @@ export const AlphaQ: React.FC = () => {
       } else {
         setMessages([...newMessages, { role: 'model', content: `Error: ${data.error || 'Failed to connect to AI'}` }]);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setMessages([...newMessages, { role: 'model', content: 'Network error. Make sure the backend server is running.' }]);
+      const errorMessage = error.response?.data?.error || 'Network error. Make sure the backend server is running.';
+      setMessages([...newMessages, { role: 'model', content: `Error: ${errorMessage}` }]);
     } finally {
       setIsLoading(false);
     }

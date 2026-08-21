@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   User,
   Save,
-  CheckCircle2
+  CheckCircle2,
+  Camera
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useStore } from '../store/useStore';
@@ -10,7 +11,7 @@ import api from '../api/client';
 
 export const Profile: React.FC = () => {
   const { user, currentProfile, fetchCurrentUser } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [savedSuccess, setSavedSuccess] = useState(false);
 
@@ -34,6 +35,20 @@ export const Profile: React.FC = () => {
     bio: '',
     profilePhotoUrl: ''
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setFormData({ ...formData, profilePhotoUrl: event.target?.result as string });
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
 
   useEffect(() => {
     async function loadProfile() {
@@ -105,31 +120,46 @@ export const Profile: React.FC = () => {
         {/* Profile Card & Photo */}
         <GlassCard className="p-6 bg-[#0b1b33] border-white/15">
           <div className="flex flex-col sm:flex-row items-center gap-6">
-            <img
-              src={formData.profilePhotoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200'}
-              alt={formData.fullName}
-              className="w-24 h-24 rounded-2xl object-cover border-2 border-white/20 shadow-md"
-            />
+            
+            <div 
+              className="relative w-24 h-24 rounded-2xl flex-shrink-0 group cursor-pointer"
+              onClick={() => fileInputRef.current?.click()}
+              title="Upload Profile Photo"
+            >
+              {formData.profilePhotoUrl ? (
+                <img
+                  src={formData.profilePhotoUrl}
+                  alt={formData.fullName || 'Athlete'}
+                  className="w-full h-full rounded-2xl object-cover border-2 border-white/20 shadow-md transition-opacity group-hover:opacity-40"
+                />
+              ) : (
+                <div className="w-full h-full rounded-2xl bg-[#061220] border-2 border-white/10 flex items-center justify-center shadow-md transition-opacity group-hover:opacity-40">
+                  <User className="w-10 h-10 text-slate-400" />
+                </div>
+              )}
+              {/* Overlay Add Button */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <Camera className="w-8 h-8 text-white drop-shadow-md" />
+              </div>
+              <input 
+                type="file" 
+                accept="image/*" 
+                className="hidden" 
+                ref={fileInputRef}
+                onChange={handlePhotoUpload} 
+              />
+            </div>
+
             <div className="flex-1 space-y-3 w-full text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Full Name</label>
-                  <input
-                    type="text"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className="w-full p-2.5 rounded-lg glass-input"
-                  />
-                </div>
-                <div>
-                  <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Photo URL</label>
-                  <input
-                    type="text"
-                    value={formData.profilePhotoUrl}
-                    onChange={(e) => setFormData({ ...formData, profilePhotoUrl: e.target.value })}
-                    className="w-full p-2.5 rounded-lg glass-input"
-                  />
-                </div>
+              <div>
+                <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="w-full p-2.5 rounded-lg glass-input"
+                />
               </div>
             </div>
           </div>

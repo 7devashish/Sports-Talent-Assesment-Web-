@@ -45,6 +45,7 @@ app.use('/api/assessments', assessmentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/coach', coachRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/cricbuzz', require('./routes/cricbuzz'));
 
 // Global Error Handler
 app.use((err, req, res, next) => {

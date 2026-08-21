@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Zap,
   Activity,
@@ -21,9 +21,35 @@ interface AssessmentWizardProps {
 
 export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ onComplete }) => {
   const { user, currentProfile } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [step, setStep] = useState(1);
+  const [cvData, setCvData] = useState<any>(null);
+  const [isLoadingCv, setIsLoadingCv] = useState(false);
+
+  useEffect(() => {
+    const fetchCvData = async () => {
+      if (step === 6) {
+        setIsLoadingCv(true);
+        try {
+          const res = await api.get(`/players/${playerId}`);
+          if (res.data && res.data.cvAssessments && res.data.cvAssessments.length > 0) {
+            // Get the most recent CV assessment
+            const latestCv = res.data.cvAssessments.sort((a: any, b: any) => 
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )[0];
+            setCvData(latestCv);
+          }
+        } catch (error) {
+          console.error("Failed to fetch CV Data:", error);
+        } finally {
+          setIsLoadingCv(false);
+        }
+      }
+    };
+    fetchCvData();
+  }, [step, playerId]);
+
   const [formData, setFormData] = useState({
     sport: 'cricket',
     role: 'batter',
@@ -348,18 +374,55 @@ export const AssessmentWizard: React.FC<AssessmentWizardProps> = ({ onComplete }
         {step === 6 && (
           <div className="space-y-4">
             <h2 className="text-lg font-black uppercase text-white">Computer Vision Biomechanics Telemetry</h2>
-            <div className="p-4 rounded-2xl bg-[#061220] border border-white/15 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#e2f939]/15 flex items-center justify-center text-[#e2f939]">
-                  <CheckCircle2 className="w-5 h-5" />
+            
+            {isLoadingCv ? (
+              <div className="p-8 text-center text-slate-400 font-bold animate-pulse">
+                Fetching latest lab telemetry...
+              </div>
+            ) : cvData ? (
+              <div className="space-y-3">
+                <div className="p-4 rounded-2xl bg-[#061220] border border-[#e2f939]/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#e2f939]/15 flex items-center justify-center text-[#e2f939]">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-white text-xs uppercase">Cricket Kinematic Engine</div>
+                      <div className="text-[11px] text-slate-300">
+                        Assessment: {cvData.assessment_name.replace('_', ' ').toUpperCase()} • 
+                        Conf: {(cvData.measurement_confidence * 100).toFixed(0)}%
+                      </div>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono font-bold text-[#e2f939] px-2 py-1 bg-[#e2f939]/10 rounded border border-[#e2f939]/30">Synced</span>
                 </div>
-                <div>
-                  <div className="font-bold text-white text-xs uppercase">MediaPipe 33-Joint Pose Telemetry</div>
-                  <div className="text-[11px] text-slate-400">Stance Stability: 91/100 • Balance: 89/100 • Head: 94/100</div>
+
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="p-3 bg-[#061220] rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Stance Stability</div>
+                    <div className="text-xl font-black text-white font-mono">{cvData.posture_stability_score}<span className="text-xs text-slate-500">/100</span></div>
+                  </div>
+                  <div className="p-3 bg-[#061220] rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Head Stability</div>
+                    <div className="text-xl font-black text-white font-mono">{cvData.head_stability_score}<span className="text-xs text-slate-500">/100</span></div>
+                  </div>
+                  <div className="p-3 bg-[#061220] rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Stance Base Ratio</div>
+                    <div className="text-xl font-black text-[#e2f939] font-mono">{cvData.stance_width_ratio}x</div>
+                  </div>
+                  <div className="p-3 bg-[#061220] rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Knee Flexion</div>
+                    <div className="text-xl font-black text-[#e2f939] font-mono">{cvData.front_knee_flexion_deg}°</div>
+                  </div>
                 </div>
               </div>
-              <span className="text-xs font-mono font-bold text-[#e2f939]">Calibrated</span>
-            </div>
+            ) : (
+              <div className="p-6 rounded-2xl bg-[#061220] border border-red-500/30 flex flex-col items-center justify-center text-center">
+                <ShieldCheck className="w-8 h-8 text-slate-400 mb-2" />
+                <div className="font-bold text-slate-300 text-sm">No CV Telemetry Found</div>
+                <div className="text-xs text-slate-500 mt-1">Please complete a CV Biomechanics Lab session first to record kinematic signatures.</div>
+              </div>
+            )}
           </div>
         )}
 

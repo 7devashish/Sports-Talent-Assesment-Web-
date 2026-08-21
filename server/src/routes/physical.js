@@ -72,7 +72,7 @@ router.post('/:playerId', requireAuth, async (req, res) => {
             const cvAssessments = await query('SELECT * FROM cv_assessments WHERE player_id = ?', [playerId]);
             const progressHistory = await query('SELECT * FROM progress_history WHERE player_id = ?', [playerId]);
 
-            const result = evaluatePlayerTalent({
+            const result = await evaluatePlayerTalent({
                 player,
                 batting,
                 bowling,

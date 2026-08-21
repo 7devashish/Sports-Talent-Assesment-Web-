@@ -22,8 +22,7 @@ def calculate_angle(a, b, c):
 
 def analyze_batting_pose(landmarks):
     """
-    Analyzes batting posture from 33 MediaPipe pose landmarks.
-    Landmarks dictionary/list with normalized x, y, z coordinates.
+    Analyzes cricket cover drive posture from 33 MediaPipe pose landmarks.
     """
     try:
         # Landmarks:
@@ -32,25 +31,36 @@ def analyze_batting_pose(landmarks):
         # 23: left_hip, 24: right_hip, 25: left_knee, 26: right_knee
         # 27: left_ankle, 28: right_ankle
 
-        # Stance base width vs shoulder width ratio
+        # Calculate stride width (distance between ankles) vs shoulder width
         shoulder_width = abs(landmarks[11]['x'] - landmarks[12]['x']) + 1e-5
-        ankle_width = abs(landmarks[27]['x'] - landmarks[28]['x'])
-        stance_ratio = ankle_width / shoulder_width
+        ankle_dist = math.hypot(landmarks[27]['x'] - landmarks[28]['x'], landmarks[27]['y'] - landmarks[28]['y'])
+        stance_ratio = ankle_dist / shoulder_width
 
-        # Head stability (vertical alignment with mid-hip center)
-        mid_hip_x = (landmarks[23]['x'] + landmarks[24]['x']) / 2.0
-        head_drift = abs(landmarks[0]['x'] - mid_hip_x)
-        head_stability_score = max(50.0, min(99.0, 100.0 - (head_drift * 120.0)))
-
-        # Stance stability score
-        stance_score = 90.0 if (1.0 <= stance_ratio <= 1.4) else max(50.0, 90.0 - abs(stance_ratio - 1.2) * 80.0)
-
-        # Front knee flexion angle (e.g. left knee for right hand batter)
-        knee_angle = calculate_angle(
+        # Knee flexion angles
+        left_knee_angle = calculate_angle(
             [landmarks[23]['x'], landmarks[23]['y']],
             [landmarks[25]['x'], landmarks[25]['y']],
             [landmarks[27]['x'], landmarks[27]['y']]
         )
+        right_knee_angle = calculate_angle(
+            [landmarks[24]['x'], landmarks[24]['y']],
+            [landmarks[26]['x'], landmarks[26]['y']],
+            [landmarks[28]['x'], landmarks[28]['y']]
+        )
+
+        # In a cover drive, the front knee is bent (lunging forward). We identify the front knee as the more bent one.
+        front_knee_angle = min(left_knee_angle, right_knee_angle)
+        
+        # Identify the front knee x-coordinate
+        front_knee_x = landmarks[25]['x'] if front_knee_angle == left_knee_angle else landmarks[26]['x']
+
+        # Head stability/alignment: For a good cover drive, the head (nose) should lean over the front knee.
+        head_drift = abs(landmarks[0]['x'] - front_knee_x)
+        # Score is higher when head is directly over or slightly ahead of the knee
+        head_stability_score = max(50.0, min(99.0, 100.0 - (head_drift * 150.0)))
+
+        # Stance/Stride score: A good cover drive has a wide, stable base (1.5x to 2.2x shoulder width)
+        stance_score = 90.0 if (1.4 <= stance_ratio <= 2.2) else max(50.0, 90.0 - abs(stance_ratio - 1.8) * 40.0)
 
         # Hip-Shoulder Separation Angle (Rotational torque)
         shoulder_angle = math.atan2(landmarks[12]['y'] - landmarks[11]['y'], landmarks[12]['x'] - landmarks[11]['x'])
@@ -68,7 +78,7 @@ def analyze_batting_pose(landmarks):
             "head_stability_score": round(head_stability_score, 1),
             "movement_efficiency_score": round((balance_score + rotational_score) / 2.0, 1),
             "stance_width_ratio": round(stance_ratio, 2),
-            "front_knee_flexion_deg": round(knee_angle, 1),
+            "front_knee_flexion_deg": round(front_knee_angle, 1),
             "hip_shoulder_separation_deg": round(hip_shoulder_sep, 1)
         }
     except Exception as e:

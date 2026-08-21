@@ -137,76 +137,27 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             </button>
           </nav>
 
-          {/* Right Action Bar / Demo Switcher */}
+          {/* Right Action Bar */}
           <div className="flex items-center gap-3">
-            {/* Quick Demo Switcher for Hackathon Judges */}
-            <div className="relative">
-              <button
-                onClick={() => setDemoMenuOpen(!demoMenuOpen)}
-                className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0b1b33] border border-white/15 text-slate-200 flex items-center gap-2 hover:border-[#e2f939]/60 transition-all cursor-pointer"
-              >
-                <div className="w-2 h-2 rounded-full bg-[#e2f939]" />
-                <span className="hidden sm:inline text-slate-400">Demo Profile:</span>
-                <span className="font-extrabold text-white truncate max-w-[110px]">
-                  {user ? user.full_name : 'Rahul (Batter)'}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-              </button>
-
-              {demoMenuOpen && (
-                <div className="absolute right-0 mt-2 w-72 rounded-2xl bg-[#0b1b33] border border-white/15 shadow-2xl py-2 z-50 animate-in fade-in duration-100">
-                  <div className="px-3.5 py-1.5 border-b border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Judge 1-Click Demo Switcher
-                  </div>
-                  <button
-                    onClick={() => handleDemoSwitch('player')}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-bold text-white">🏏 Rahul Sharma (17)</div>
-                      <div className="text-[11px] text-[#e2f939]">Aggressive Top-Order Batter (88 Pot)</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDemoSwitch('fast_bowler')}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-bold text-white">⚡ Vikram Rathore (18)</div>
-                      <div className="text-[11px] text-[#e2f939]">Express Pace Bowler 141 km/h (91 Pot)</div>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => handleDemoSwitch('all_rounder')}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-bold text-white">🌀 Ananya Patel (16)</div>
-                      <div className="text-[11px] text-[#e2f939]">Leg-Spin All-Rounder (89 Pot)</div>
-                    </div>
-                  </button>
-                  <div className="border-t border-white/10 my-1"></div>
-                  <button
-                    onClick={() => handleDemoSwitch('scout')}
-                    className="w-full text-left px-3.5 py-2.5 text-xs text-slate-200 hover:bg-white/5 flex items-center justify-between cursor-pointer"
-                  >
-                    <div>
-                      <div className="font-bold text-white">🔍 Rajesh Dravid (Scout)</div>
-                      <div className="text-[11px] text-sky-400">Senior National Scout Dashboard</div>
-                    </div>
-                  </button>
-                </div>
-              )}
-            </div>
-
             {user ? (
-              <button
-                onClick={logout}
-                title="Sign Out"
-                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
+              <>
+                <button
+                  onClick={() => setCurrentTab('profile')}
+                  className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#0b1b33] border border-white/15 text-slate-200 flex items-center gap-2 hover:border-[#e2f939]/60 transition-all cursor-pointer"
+                >
+                  <div className="w-2 h-2 rounded-full bg-[#e2f939]" />
+                  <span className="font-extrabold text-white truncate max-w-[110px]">
+                    {user.full_name}
+                  </span>
+                </button>
+                <button
+                  onClick={logout}
+                  title="Sign Out"
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => setCurrentTab('login')}

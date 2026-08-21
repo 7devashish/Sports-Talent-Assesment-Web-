@@ -43,7 +43,7 @@ export const TrajectoryChart: React.FC<TrajectoryChartProps> = ({
         <LineChart data={chartData} margin={{ top: 10, right: 20, left: -10, bottom: 0 }}>
           <CartesianGrid stroke="#172a45" strokeDasharray="3 3" vertical={false} />
           <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
-          <YAxis domain={[50, 100]} stroke="#64748b" fontSize={11} tickLine={false} />
+          <YAxis domain={[0, 100]} stroke="#64748b" fontSize={11} tickLine={false} />
           <Tooltip
             contentStyle={{
               backgroundColor: '#0b1a30',

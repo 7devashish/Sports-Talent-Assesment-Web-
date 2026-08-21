@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   BarChart3,
   UploadCloud,
   CheckCircle2,
-  Save
+  Save,
+  Database
 } from 'lucide-react';
 import { GlassCard } from '../components/ui/GlassCard';
 import { useStore } from '../store/useStore';
@@ -11,51 +12,51 @@ import api from '../api/client';
 
 export const Statistics: React.FC = () => {
   const { user, currentProfile } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [activeTab, setActiveTab] = useState<'batting' | 'bowling' | 'fielding'>('batting');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const [battingForm, setBattingForm] = useState({
-    matches: 28,
-    innings: 26,
-    runs: 1140,
-    ballsFaced: 775,
-    highestScore: 112,
-    fours: 118,
-    sixes: 34,
-    fifties: 7,
-    hundreds: 3,
-    notOuts: 2,
-    dotBallPercentage: 36.2,
-    boundaryPercentage: 21.8,
-    powerplayStrikeRate: 156.4,
-    middleOversStrikeRate: 132.8,
-    deathOversStrikeRate: 172.5,
-    avgVsPace: 52.4,
-    avgVsSpin: 39.8,
-    chaseAverage: 51.2,
-    pressureIndex: 86.5
+    matches: 0,
+    innings: 0,
+    runs: 0,
+    ballsFaced: 0,
+    highestScore: 0,
+    fours: 0,
+    sixes: 0,
+    fifties: 0,
+    hundreds: 0,
+    notOuts: 0,
+    dotBallPercentage: 0,
+    boundaryPercentage: 0,
+    powerplayStrikeRate: 0,
+    middleOversStrikeRate: 0,
+    deathOversStrikeRate: 0,
+    avgVsPace: 0,
+    avgVsSpin: 0,
+    chaseAverage: 0,
+    pressureIndex: 0
   });
 
   const [bowlingForm, setBowlingForm] = useState({
-    matches: 24,
-    innings: 24,
-    overs: 92.4,
-    maidens: 8,
-    runsConceded: 580,
-    wickets: 46,
-    bestBowlingWickets: 5,
-    bestBowlingRuns: 18,
-    dotBallPercentage: 62.4,
-    fourWicketHauls: 3,
-    fiveWicketHauls: 2,
-    averageSpeedKmh: 134.8,
-    maxSpeedKmh: 141.2,
-    yorkerPercentage: 24.5,
-    bouncerPercentage: 18.0,
-    powerplayEconomy: 5.4,
-    deathOversEconomy: 7.8
+    matches: 0,
+    innings: 0,
+    overs: 0,
+    maidens: 0,
+    runsConceded: 0,
+    wickets: 0,
+    bestBowlingWickets: 0,
+    bestBowlingRuns: 0,
+    dotBallPercentage: 0,
+    fourWicketHauls: 0,
+    fiveWicketHauls: 0,
+    averageSpeedKmh: 0,
+    maxSpeedKmh: 0,
+    yorkerPercentage: 0,
+    bouncerPercentage: 0,
+    powerplayEconomy: 0,
+    deathOversEconomy: 0
   });
 
   useEffect(() => {
@@ -63,10 +64,50 @@ export const Statistics: React.FC = () => {
       try {
         const res = await api.get(`/statistics/${playerId}`);
         if (res.data.batting) {
-          setBattingForm((prev) => ({ ...prev, ...res.data.batting }));
+          const b = res.data.batting;
+          setBattingForm({
+            matches: b.matches || 0,
+            innings: b.innings || 0,
+            runs: b.runs || 0,
+            ballsFaced: b.balls_faced || 0,
+            highestScore: b.highest_score || 0,
+            fours: b.fours || 0,
+            sixes: b.sixes || 0,
+            fifties: b.fifties || 0,
+            hundreds: b.hundreds || 0,
+            notOuts: b.not_outs || 0,
+            dotBallPercentage: b.dot_ball_percentage || 0,
+            boundaryPercentage: b.boundary_percentage || 0,
+            powerplayStrikeRate: b.powerplay_strike_rate || 0,
+            middleOversStrikeRate: b.middle_overs_strike_rate || 0,
+            deathOversStrikeRate: b.death_overs_strike_rate || 0,
+            avgVsPace: b.avg_vs_pace || 0,
+            avgVsSpin: b.avg_vs_spin || 0,
+            chaseAverage: b.chase_average || 0,
+            pressureIndex: b.pressure_index || 0
+          });
         }
         if (res.data.bowling) {
-          setBowlingForm((prev) => ({ ...prev, ...res.data.bowling }));
+          const bw = res.data.bowling;
+          setBowlingForm({
+            matches: bw.matches || 0,
+            innings: bw.innings || 0,
+            overs: bw.overs || 0,
+            maidens: bw.maidens || 0,
+            runsConceded: bw.runs_conceded || 0,
+            wickets: bw.wickets || 0,
+            bestBowlingWickets: bw.best_bowling_wickets || 0,
+            bestBowlingRuns: bw.best_bowling_runs || 0,
+            dotBallPercentage: bw.dot_ball_percentage || 0,
+            fourWicketHauls: bw.four_wicket_hauls || 0,
+            fiveWicketHauls: bw.five_wicket_hauls || 0,
+            averageSpeedKmh: bw.average_speed_kmh || 0,
+            maxSpeedKmh: bw.max_speed_kmh || 0,
+            yorkerPercentage: bw.yorker_percentage || 0,
+            bouncerPercentage: bw.bouncer_percentage || 0,
+            powerplayEconomy: bw.powerplay_economy || 0,
+            deathOversEconomy: bw.death_overs_economy || 0
+          });
         }
       } catch (err) {
         console.error('Failed to load stats:', err);
@@ -97,17 +138,105 @@ export const Statistics: React.FC = () => {
     }
   };
 
-  const handleMockCsvImport = async (type: string) => {
-    try {
-      await api.post(`/statistics/${playerId}/mock-csv-import`, { csvType: type });
-      const res = await api.get(`/statistics/${playerId}`);
-      if (type === 'batting' && res.data.batting) setBattingForm(res.data.batting);
-      if (type === 'bowling' && res.data.bowling) setBowlingForm(res.data.bowling);
-      setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 3000);
-    } catch (err) {
-      console.error('CSV import error:', err);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importType, setImportType] = useState<'batting' | 'bowling'>('batting');
+
+  const [cricbuzzMatchId, setCricbuzzMatchId] = useState('');
+  const [cricbuzzPlayerId, setCricbuzzPlayerId] = useState('');
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const handleCricbuzzSync = async () => {
+    if (!cricbuzzMatchId || !cricbuzzPlayerId) {
+      alert('Please enter both Cricbuzz Match ID and Player ID');
+      return;
     }
+    setIsSyncing(true);
+    try {
+      await api.post('/cricbuzz/ingest-scorecard', { matchId: cricbuzzMatchId });
+      await api.post('/cricbuzz/link-player', { starqPlayerId: playerId, cricbuzzPlayerId });
+      setSavedSuccess(true);
+      setTimeout(() => {
+        setSavedSuccess(false);
+        window.location.reload();
+      }, 1500);
+    } catch (err: any) {
+      console.error('Cricbuzz sync failed', err);
+      alert('Failed to sync from Cricbuzz API. ' + (err.response?.data?.error || err.message));
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleImportClick = (type: 'batting' | 'bowling') => {
+    setImportType(type);
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+      
+      if (lines.length > 1) {
+        // Simple mapping from a comma-separated row of values
+        const values = lines[1].split(',').map(v => parseFloat(v) || 0);
+        
+        if (importType === 'batting') {
+          setBattingForm({
+            matches: values[0] || 0,
+            innings: values[1] || 0,
+            runs: values[2] || 0,
+            ballsFaced: values[3] || 0,
+            highestScore: values[4] || 0,
+            fours: values[5] || 0,
+            sixes: values[6] || 0,
+            fifties: values[7] || 0,
+            hundreds: values[8] || 0,
+            notOuts: values[9] || 0,
+            dotBallPercentage: values[10] || 0,
+            boundaryPercentage: values[11] || 0,
+            powerplayStrikeRate: values[12] || 0,
+            middleOversStrikeRate: values[13] || 0,
+            deathOversStrikeRate: values[14] || 0,
+            avgVsPace: values[15] || 0,
+            avgVsSpin: values[16] || 0,
+            chaseAverage: values[17] || 0,
+            pressureIndex: values[18] || 0
+          });
+        } else {
+          setBowlingForm({
+            matches: values[0] || 0,
+            innings: values[1] || 0,
+            overs: values[2] || 0,
+            maidens: values[3] || 0,
+            runsConceded: values[4] || 0,
+            wickets: values[5] || 0,
+            bestBowlingWickets: values[6] || 0,
+            bestBowlingRuns: values[7] || 0,
+            dotBallPercentage: values[8] || 0,
+            fourWicketHauls: values[9] || 0,
+            fiveWicketHauls: values[10] || 0,
+            averageSpeedKmh: values[11] || 0,
+            maxSpeedKmh: values[12] || 0,
+            yorkerPercentage: values[13] || 0,
+            bouncerPercentage: values[14] || 0,
+            powerplayEconomy: values[15] || 0,
+            deathOversEconomy: values[16] || 0
+          });
+        }
+        setSavedSuccess(true);
+        setTimeout(() => setSavedSuccess(false), 3000);
+      }
+      
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
   };
 
   return (
@@ -123,17 +252,24 @@ export const Statistics: React.FC = () => {
           </p>
         </div>
 
-        {/* Quick CSV Import Mock Buttons */}
+        {/* Real CSV Import Buttons */}
         <div className="flex items-center gap-2">
+          <input 
+            type="file" 
+            accept=".csv" 
+            className="hidden" 
+            ref={fileInputRef} 
+            onChange={handleFileUpload} 
+          />
           <button
-            onClick={() => handleMockCsvImport('batting')}
+            onClick={() => handleImportClick('batting')}
             className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#0b1b33] hover:bg-[#102444] text-slate-200 border border-white/10 flex items-center gap-1.5 cursor-pointer transition-all"
           >
             <UploadCloud className="w-4 h-4 text-[#e2f939]" />
             Import Batting CSV
           </button>
           <button
-            onClick={() => handleMockCsvImport('bowling')}
+            onClick={() => handleImportClick('bowling')}
             className="px-3.5 py-2 rounded-xl text-xs font-bold bg-[#0b1b33] hover:bg-[#102444] text-slate-200 border border-white/10 flex items-center gap-1.5 cursor-pointer transition-all"
           >
             <UploadCloud className="w-4 h-4 text-sky-400" />
@@ -141,6 +277,40 @@ export const Statistics: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Cricbuzz Integration */}
+      <GlassCard className="p-4 bg-[#061220]/50 border-white/10">
+        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
+          <div className="flex-1">
+            <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Cricbuzz Match ID</label>
+            <input
+              type="text"
+              placeholder="e.g. 101416"
+              value={cricbuzzMatchId}
+              onChange={(e) => setCricbuzzMatchId(e.target.value)}
+              className="w-full p-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs focus:border-[#e2f939] focus:outline-none transition-colors"
+            />
+          </div>
+          <div className="flex-1">
+            <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Cricbuzz Player ID</label>
+            <input
+              type="text"
+              placeholder="e.g. 1413"
+              value={cricbuzzPlayerId}
+              onChange={(e) => setCricbuzzPlayerId(e.target.value)}
+              className="w-full p-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs focus:border-[#e2f939] focus:outline-none transition-colors"
+            />
+          </div>
+          <button
+            onClick={handleCricbuzzSync}
+            disabled={isSyncing}
+            className="px-4 py-2 rounded-lg text-xs font-bold bg-[#e2f939] hover:bg-[#d0e625] text-[#061220] transition-colors disabled:opacity-50 flex items-center gap-2"
+          >
+            <Database className="w-4 h-4" />
+            {isSyncing ? 'Syncing...' : 'Sync from Cricbuzz'}
+          </button>
+        </div>
+      </GlassCard>
 
       {savedSuccess && (
         <div className="p-3.5 rounded-xl bg-[#e2f939]/15 border border-[#e2f939]/30 text-[#e2f939] text-xs font-bold flex items-center gap-2">

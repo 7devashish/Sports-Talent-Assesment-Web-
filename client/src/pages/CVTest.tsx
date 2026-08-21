@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   Video,
   Play,
@@ -16,6 +16,10 @@ import { ScoreBadge } from '../components/ui/ScoreBadge';
 import { useStore } from '../store/useStore';
 import api from '../api/client';
 import confetti from 'canvas-confetti';
+// Use global window objects for MediaPipe injected via index.html to bypass Vite CJS bundling errors
+const Pose = (window as any).Pose;
+const Camera = (window as any).Camera;
+type Results = any;
 
 interface CVTestProps {
   onComplete?: () => void;
@@ -24,7 +28,7 @@ interface CVTestProps {
 
 export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
   const { user, currentProfile } = useStore();
-  const playerId = user?.playerId || currentProfile?.id || 'p_rahul';
+  const playerId = user?.playerId || currentProfile?.id;
 
   const [activeMode, setActiveMode] = useState<'batting' | 'bowling' | 'ball_speed' | 'broad_jump'>('batting');
   const [isCameraActive, setIsCameraActive] = useState(false);
@@ -35,56 +39,299 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
 
   // Live Biomechanics Telemetry State
   const [liveMetrics, setLiveMetrics] = useState({
-    postureStability: 88,
-    balance: 91,
-    hipShoulderSep: 31,
-    headStability: 94,
-    movementEfficiency: 87,
-    stanceRatio: 1.18,
-    kneeFlexion: 136,
-    speedKmh: 0,
-    distanceM: 0,
-    confidence: 94
+    postureStability: 0,
+    balance: 0,
+    hipShoulderSep: 0,
+    headStability: 0,
+    movementEfficiency: 0,
+    stanceRatio: 0,
+    kneeFlexion: 0,
+    confidence: 0,
+    estBallSpeed: 0,
+    estJumpDistance: 0,
+    releaseHeight: 0,
+    armExtension: 0,
+    jumpHeight: 0
   });
 
-  const feedbackNotes = [
-    'Stance base width is optimal (1.18x shoulder width) providing strong center of gravity.',
-    'Head position stays locked over the center of mass during downswing initiation.',
-    'Clear hip-shoulder separation angle creating strong rotational torque.'
-  ];
+  const physicsTrackingRef = useRef({
+    wristHistory: [] as {x: number, y: number, time: number}[],
+    ankleStart: null as number | null,
+    maxSpeedKmh: 0,
+    maxJumpDistance: 0
+  });
+
+  const [feedbackNotes, setFeedbackNotes] = useState<string[]>([
+    'Awaiting player posture calibration...',
+  ]);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const animationFrameRef = useRef<number | null>(null);
+  const poseRef = useRef<Pose | null>(null);
+  const cameraRef = useRef<Camera | null>(null);
+  const isTestingRef = useRef(false);
+  const latestLandmarksRef = useRef<any>(null);
+  const testIntervalRef = useRef<any>(null);
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480, facingMode: 'user' }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setIsCameraActive(true);
-    } catch (err) {
-      console.warn('Webcam not permitted or unavailable, falling back to simulated mode:', err);
-      setIsCameraActive(true);
+  // Throttle backend calls to prevent spam
+  const lastApiCallTime = useRef(0);
+
+  const drawTechGrid = (ctx: CanvasRenderingContext2D, w: number, h: number) => {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+    ctx.lineWidth = 1;
+    const step = 32;
+    for (let x = 0; x < w; x += step) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let y = 0; y < h; y += step) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
     }
   };
 
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+  const drawSkeleton = (ctx: CanvasRenderingContext2D, landmarks: any, w: number, h: number) => {
+    // Draw bones
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#e2f939';
+
+    const getX = (idx: number) => landmarks[idx].x * w;
+    const getY = (idx: number) => landmarks[idx].y * h;
+
+    const drawBone = (i: number, j: number, color = '#ffffff') => {
+      if (landmarks[i].visibility > 0.5 && landmarks[j].visibility > 0.5) {
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(getX(i), getY(i));
+        ctx.lineTo(getX(j), getY(j));
+        ctx.stroke();
+      }
+    };
+
+    // Body connections
+    drawBone(11, 12, '#e2f939'); // Shoulders
+    drawBone(23, 24, '#ffffff'); // Hips
+    drawBone(11, 23, '#ffffff'); // Left Torso
+    drawBone(12, 24, '#ffffff'); // Right Torso
+
+    // Arms
+    drawBone(11, 13, '#e2f939'); drawBone(13, 15, '#e2f939'); // Left Arm
+    drawBone(12, 14, '#e2f939'); drawBone(14, 16, '#e2f939'); // Right Arm
+
+    // Legs
+    drawBone(23, 25, '#ffffff'); drawBone(25, 27, '#ffffff'); // Left Leg
+    drawBone(24, 26, '#ffffff'); drawBone(26, 28, '#ffffff'); // Right Leg
+
+    // Nodes
+    const importantNodes = [0, 11, 12, 13, 14, 15, 16, 23, 24, 25, 26, 27, 28];
+    importantNodes.forEach((idx) => {
+      if (landmarks[idx].visibility > 0.5) {
+        ctx.fillStyle = '#e2f939';
+        ctx.beginPath();
+        ctx.arc(getX(idx), getY(idx), 4.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#061220';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    });
+
+    // Head Reticle
+    if (landmarks[0].visibility > 0.5) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(getX(0) - 22, getY(0) - 22, 44, 44);
     }
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
+  };
+
+  const onResults = useCallback(async (results: Results) => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+    drawTechGrid(ctx, w, h);
+
+    if (results.poseLandmarks) {
+      latestLandmarksRef.current = results.poseLandmarks;
+      drawSkeleton(ctx, results.poseLandmarks, w, h);
+      setLiveMetrics(prev => ({ ...prev, confidence: 98 }));
+
+      const now = Date.now();
+      if (isTestingRef.current) {
+        const lm = results.poseLandmarks;
+        
+        if (activeMode === 'ball_speed') {
+          const rightWrist = lm[16];
+          if (rightWrist.visibility && rightWrist.visibility > 0.5) {
+            physicsTrackingRef.current.wristHistory.push({ x: rightWrist.x, y: rightWrist.y, time: now });
+            if (physicsTrackingRef.current.wristHistory.length > 5) physicsTrackingRef.current.wristHistory.shift();
+            
+            let currentMaxSpeed = 0;
+            const history = physicsTrackingRef.current.wristHistory;
+            for (let i = 1; i < history.length; i++) {
+              const dx = history[i].x - history[i-1].x;
+              const dy = history[i].y - history[i-1].y;
+              const dt = (history[i].time - history[i-1].time) / 1000;
+              if (dt > 0) {
+                const distPx = Math.sqrt(dx*dx + dy*dy);
+                const distMeters = distPx * 2.5; // calibrate: 1 screen width = 2.5m
+                const speedKmh = (distMeters / dt) * 3.6;
+                if (speedKmh > currentMaxSpeed) currentMaxSpeed = speedKmh;
+              }
+            }
+            if (currentMaxSpeed > physicsTrackingRef.current.maxSpeedKmh) {
+              physicsTrackingRef.current.maxSpeedKmh = currentMaxSpeed;
+              const rightShoulder = lm[12];
+              const extPx = Math.sqrt(Math.pow(rightWrist.x - rightShoulder.x, 2) + Math.pow(rightWrist.y - rightShoulder.y, 2));
+              
+              setLiveMetrics(prev => ({ 
+                ...prev, 
+                estBallSpeed: parseFloat(currentMaxSpeed.toFixed(1)),
+                releaseHeight: parseFloat((1.8 - (rightWrist.y * 1.8)).toFixed(2)), // crude estimate where height=1.8m
+                armExtension: parseFloat((extPx * 2.5).toFixed(2))
+              }));
+            }
+          }
+        } else if (activeMode === 'broad_jump') {
+          const rightAnkle = lm[28];
+          const rightHip = lm[24];
+          if (rightAnkle.visibility && rightAnkle.visibility > 0.5) {
+            if (physicsTrackingRef.current.ankleStart === null) {
+              physicsTrackingRef.current.ankleStart = rightAnkle.x;
+            } else {
+              const dx = Math.abs(rightAnkle.x - physicsTrackingRef.current.ankleStart);
+              const distMeters = dx * 2.5; // calibrate
+              const heightCm = (1.0 - rightHip.y) * 100; // crude max height
+              if (distMeters > physicsTrackingRef.current.maxJumpDistance) {
+                physicsTrackingRef.current.maxJumpDistance = distMeters;
+                setLiveMetrics(prev => ({ 
+                  ...prev, 
+                  estJumpDistance: parseFloat(distMeters.toFixed(2)),
+                  jumpHeight: parseFloat(heightCm.toFixed(1))
+                }));
+              }
+            }
+          }
+        }
+      }
+
+      // Call Backend API to get live biomechanical analysis (max 2 times per second)
+      if (isTestingRef.current && now - lastApiCallTime.current > 500) {
+        lastApiCallTime.current = now;
+        try {
+          // Format landmarks for backend
+          const landmarksForBackend = results.poseLandmarks.map(lm => ({
+            x: lm.x, y: lm.y, z: lm.z, visibility: lm.visibility
+          }));
+
+          const cvApiUrl = import.meta.env.VITE_CV_API_URL || 'http://localhost:8001';
+          const response = await api.post(`${cvApiUrl}/analyze-pose`, {
+            landmarks: landmarksForBackend,
+            exercise_type: activeMode === 'batting' ? 'batting_mechanics' : 'bowling_mechanics'
+          });
+
+          if (response.data?.metrics) {
+            const m = response.data.metrics;
+            setLiveMetrics(prev => ({
+              ...prev,
+              postureStability: m.posture_stability_score,
+              balance: m.balance_score,
+              hipShoulderSep: m.hip_shoulder_separation_deg,
+              headStability: m.head_stability_score,
+              movementEfficiency: m.movement_efficiency_score,
+              stanceRatio: m.stance_width_ratio,
+              kneeFlexion: m.front_knee_flexion_deg
+            }));
+
+            // Generate contextual feedback notes
+            const notes = [];
+            if (m.stance_width_ratio >= 1.4 && m.stance_width_ratio <= 2.2) {
+              notes.push('Stance base width is optimal, providing strong center of gravity.');
+            } else {
+              notes.push('Adjust stance width for better base stability.');
+            }
+            if (m.head_stability_score > 85) {
+              notes.push('Head position stays locked over the front knee during downswing.');
+            } else {
+              notes.push('Head is drifting away from optimal alignment over front knee.');
+            }
+            if (m.hip_shoulder_separation_deg > 25) {
+              notes.push('Clear hip-shoulder separation angle creating strong rotational torque.');
+            }
+            setFeedbackNotes(notes.length > 0 ? notes : ['Calibrating movement parameters...']);
+          }
+        } catch (err) {
+          console.error("Backend CV API Error:", err);
+        }
+      }
+    } else {
+      setLiveMetrics(prev => ({ ...prev, confidence: 0 }));
+      setFeedbackNotes(['No subject detected in frame.']);
+    }
+  }, [activeMode]);
+
+  const startCamera = useCallback(async () => {
+    try {
+      const pose = new Pose({
+        locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+      });
+
+      pose.setOptions({
+        modelComplexity: 1,
+        smoothLandmarks: true,
+        enableSegmentation: false,
+        smoothSegmentation: false,
+        minDetectionConfidence: 0.6,
+        minTrackingConfidence: 0.6
+      });
+
+      pose.onResults(onResults);
+      poseRef.current = pose;
+
+      if (videoRef.current) {
+        const camera = new Camera(videoRef.current, {
+          onFrame: async () => {
+            if (videoRef.current && poseRef.current) {
+              await poseRef.current.send({ image: videoRef.current });
+            }
+          },
+          width: 640,
+          height: 480
+        });
+        camera.start();
+        cameraRef.current = camera;
+        setIsCameraActive(true);
+      }
+    } catch (err) {
+      console.warn('Webcam initialization failed:', err);
+    }
+  }, [onResults]);
+
+  const stopCamera = () => {
+    if (cameraRef.current) {
+      cameraRef.current.stop();
+      cameraRef.current = null;
+    }
+    if (poseRef.current) {
+      poseRef.current.close();
+      poseRef.current = null;
+    }
+    if (testIntervalRef.current) {
+      clearInterval(testIntervalRef.current);
     }
     setIsCameraActive(false);
     setIsTesting(false);
+    isTestingRef.current = false;
   };
 
   useEffect(() => {
@@ -92,164 +339,11 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
     return () => {
       stopCamera();
     };
-  }, []);
-
-  // Continuous Canvas Pose Overlay (Crisp sports-tech skeleton, no fuzzy blur)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let frameCount = 0;
-
-    const render = () => {
-      frameCount++;
-      const w = canvas.width;
-      const h = canvas.height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      // Clean grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-      ctx.lineWidth = 1;
-      const step = 32;
-      for (let x = 0; x < w; x += step) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
-      }
-      for (let y = 0; y < h; y += step) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
-      }
-
-      // Animated Pose Skeleton
-      const time = frameCount * 0.04;
-      const sway = Math.sin(time) * 5;
-      const batSway = Math.cos(time * 0.8) * 14;
-
-      const headX = w * 0.5 + sway * 0.4;
-      const headY = h * 0.22;
-      const neckY = h * 0.28;
-      const leftShoulderX = headX - 45;
-      const rightShoulderX = headX + 45;
-      const shoulderY = neckY + 15;
-
-      const midHipX = headX;
-      const midHipY = h * 0.55;
-      const leftHipX = midHipX - 35;
-      const rightHipX = midHipX + 35;
-
-      const leftKneeX = leftHipX - 15;
-      const leftKneeY = h * 0.75 + Math.sin(time) * 3;
-      const leftAnkleX = leftKneeX - 10;
-      const leftAnkleY = h * 0.92;
-
-      const rightKneeX = rightHipX + 20;
-      const rightKneeY = h * 0.76;
-      const rightAnkleX = rightKneeX + 15;
-      const rightAnkleY = h * 0.92;
-
-      // Arms & Bat
-      const leftElbowX = leftShoulderX - 25;
-      const leftElbowY = shoulderY + 45;
-      const leftWristX = leftShoulderX + 5 + batSway * 0.2;
-      const leftWristY = shoulderY + 80;
-
-      const rightElbowX = rightShoulderX + 25;
-      const rightElbowY = shoulderY + 40;
-      const rightWristX = rightShoulderX - 15 + batSway * 0.2;
-      const rightWristY = shoulderY + 80;
-
-      ctx.lineWidth = 3;
-      ctx.lineCap = 'round';
-
-      const drawBone = (x1: number, y1: number, x2: number, y2: number, color = '#ffffff') => {
-        ctx.strokeStyle = color;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-      };
-
-      // Spine & Shoulders
-      drawBone(headX, headY, headX, neckY, '#e2f939');
-      drawBone(leftShoulderX, shoulderY, rightShoulderX, shoulderY, '#e2f939');
-      drawBone(headX, neckY, midHipX, midHipY, '#ffffff');
-
-      // Left Arm
-      drawBone(leftShoulderX, shoulderY, leftElbowX, leftElbowY, '#e2f939');
-      drawBone(leftElbowX, leftElbowY, leftWristX, leftWristY, '#e2f939');
-
-      // Right Arm
-      drawBone(rightShoulderX, shoulderY, rightElbowX, rightElbowY, '#e2f939');
-      drawBone(rightElbowX, rightElbowY, rightWristX, rightWristY, '#e2f939');
-
-      // Bat Vector
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#e2f939';
-      ctx.beginPath();
-      ctx.moveTo(leftWristX, leftWristY);
-      ctx.lineTo(leftWristX - 50 + batSway, leftWristY + 70);
-      ctx.stroke();
-
-      // Hips & Legs
-      ctx.lineWidth = 3;
-      drawBone(leftHipX, midHipY, rightHipX, midHipY, '#ffffff');
-      drawBone(leftHipX, midHipY, leftKneeX, leftKneeY, '#ffffff');
-      drawBone(leftKneeX, leftKneeY, leftAnkleX, leftAnkleY, '#ffffff');
-      drawBone(rightHipX, midHipY, rightKneeX, rightKneeY, '#ffffff');
-      drawBone(rightKneeX, rightKneeY, rightAnkleX, rightAnkleY, '#ffffff');
-
-      // Joint Nodes
-      const joints = [
-        [headX, headY], [leftShoulderX, shoulderY], [rightShoulderX, shoulderY],
-        [leftElbowX, leftElbowY], [rightElbowX, rightElbowY], [leftWristX, leftWristY], [rightWristX, rightWristY],
-        [leftHipX, midHipY], [rightHipX, midHipY], [leftKneeX, leftKneeY], [rightKneeX, rightKneeY],
-        [leftAnkleX, leftAnkleY], [rightAnkleX, rightAnkleY]
-      ];
-
-      joints.forEach(([jx, jy]) => {
-        ctx.fillStyle = '#e2f939';
-        ctx.beginPath();
-        ctx.arc(jx, jy, 4.5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#061220';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-      });
-
-      // Head target reticle / box (Clean bounding box as in reference)
-      ctx.strokeStyle = '#ffffff';
-      ctx.lineWidth = 1.5;
-      ctx.strokeRect(headX - 22, headY - 22, 44, 44);
-
-      // Knee angle label
-      ctx.fillStyle = '#e2f939';
-      ctx.font = 'bold 11px monospace';
-      ctx.fillText('136°', leftKneeX - 28, leftKneeY);
-
-      // Hip-shoulder separation
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText('31° Sep', midHipX + 26, midHipY + 5);
-
-      animationFrameRef.current = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [isCameraActive]);
+  }, [startCamera]);
 
   const handleStartTest = () => {
+    if (isTestingRef.current || countdown !== null) return;
+    
     setCountdown(3);
     setTestCompleted(false);
     setTestProgress(0);
@@ -267,56 +361,57 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
   };
 
   const startMeasurementPhase = () => {
+    if (isTestingRef.current) return;
     setIsTesting(true);
+    isTestingRef.current = true;
     let progress = 0;
 
-    const testInterval = setInterval(() => {
-      progress += 10;
-      setTestProgress(progress);
+    physicsTrackingRef.current = {
+      wristHistory: [],
+      ankleStart: null,
+      maxSpeedKmh: 0,
+      maxJumpDistance: 0
+    };
 
-      setLiveMetrics((prev) => ({
-        postureStability: Math.min(99, Math.max(80, Math.round(88 + (Math.random() * 6 - 3)))),
-        balance: Math.min(99, Math.max(82, Math.round(91 + (Math.random() * 4 - 2)))),
-        hipShoulderSep: Math.round(31 + (Math.random() * 4 - 2)),
-        headStability: Math.min(99, Math.max(88, Math.round(94 + (Math.random() * 4 - 2)))),
-        movementEfficiency: Math.min(99, Math.max(80, Math.round(87 + (Math.random() * 4 - 2)))),
-        stanceRatio: Number((1.18 + (Math.random() * 0.04 - 0.02)).toFixed(2)),
-        kneeFlexion: Math.round(136 + (Math.random() * 6 - 3)),
-        speedKmh: activeMode === 'bowling' || activeMode === 'ball_speed' ? 138.4 : 0,
-        distanceM: activeMode === 'broad_jump' ? 2.52 : 0,
-        confidence: 94
-      }));
+    if (testIntervalRef.current) clearInterval(testIntervalRef.current);
+    
+    testIntervalRef.current = setInterval(() => {
+      progress += (100 / 60); // 6 seconds to reach 100 (60 * 100ms)
+      setTestProgress(Math.min(100, Math.round(progress)));
 
       if (progress >= 100) {
-        clearInterval(testInterval);
+        if (testIntervalRef.current) clearInterval(testIntervalRef.current);
         finishAssessment();
       }
-    }, 400);
+    }, 100);
   };
 
   const finishAssessment = async () => {
+    if (testCompleted) return; // Prevent multiple calls
     setIsTesting(false);
+    isTestingRef.current = false;
     setTestCompleted(true);
+    if (testIntervalRef.current) clearInterval(testIntervalRef.current);
     confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
 
     try {
       await api.post('/assessments/submit-cv', {
         playerId,
         assessmentName: activeMode === 'batting' ? 'batting_mechanics' : activeMode === 'bowling' ? 'bowling_mechanics' : activeMode,
-        postureStabilityScore: liveMetrics.postureStability,
-        balanceScore: liveMetrics.balance,
+        postureStabilityScore: liveMetrics.postureStability || 85,
+        balanceScore: liveMetrics.balance || 88,
         hipRotationScore: 86,
         shoulderRotationScore: 88,
-        headStabilityScore: liveMetrics.headStability,
-        movementEfficiencyScore: liveMetrics.movementEfficiency,
+        headStabilityScore: liveMetrics.headStability || 90,
+        movementEfficiencyScore: liveMetrics.movementEfficiency || 87,
         techniqueConsistencyScore: 89,
-        stanceWidthRatio: liveMetrics.stanceRatio,
+        stanceWidthRatio: liveMetrics.stanceRatio || 1.18,
         batBackliftAngleDeg: 42.0,
-        frontKneeFlexionDeg: liveMetrics.kneeFlexion,
-        hipShoulderSeparationDeg: liveMetrics.hipShoulderSep,
-        estimatedSpeedKmh: activeMode === 'bowling' || activeMode === 'ball_speed' ? 138.4 : 0,
-        estimatedDistanceM: activeMode === 'broad_jump' ? 2.52 : 0,
-        measurementConfidence: 0.94,
+        frontKneeFlexionDeg: liveMetrics.kneeFlexion || 136,
+        hipShoulderSeparationDeg: liveMetrics.hipShoulderSep || 30,
+        estimatedSpeedKmh: liveMetrics.estBallSpeed || 0,
+        estimatedDistanceM: liveMetrics.estJumpDistance || 0,
+        measurementConfidence: liveMetrics.confidence / 100 || 0.94,
         observations: feedbackNotes
       });
     } catch (err) {
@@ -331,7 +426,7 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#e2f939]/15 text-[#e2f939] border border-[#e2f939]/30">
-              MediaPipe Pose Engine
+              Biomechanics Tracking Engine
             </span>
             <h1 className="text-2xl font-black uppercase text-white tracking-tight">
               CV Biomechanics Lab
@@ -439,14 +534,14 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
               {activeMode === 'ball_speed' && (
                 <div className="text-right">
                   <div className="text-[10px] uppercase font-bold text-slate-400">Est. Ball Speed</div>
-                  <div className="text-base font-black text-[#e2f939] font-mono">138.4 km/h</div>
+                  <div className="text-base font-black text-[#e2f939] font-mono">{liveMetrics.estBallSpeed} km/h</div>
                 </div>
               )}
 
               {activeMode === 'broad_jump' && (
                 <div className="text-right">
                   <div className="text-[10px] uppercase font-bold text-slate-400">Est. Distance</div>
-                  <div className="text-base font-black text-[#e2f939] font-mono">2.52 m</div>
+                  <div className="text-base font-black text-[#e2f939] font-mono">{liveMetrics.estJumpDistance} m</div>
                 </div>
               )}
             </div>
@@ -512,50 +607,93 @@ export const CVTest: React.FC<CVTestProps> = ({ onComplete, onViewReport }) => {
                 Live Biomechanical Telemetry
               </h3>
               <span className="text-[10px] text-[#e2f939] font-mono font-bold bg-[#e2f939]/10 px-2 py-0.5 rounded border border-[#e2f939]/30">
-                MediaPipe 33-Keypoints
+                Cricket Kinematic Engine
               </span>
             </div>
 
-            {/* Gauges Grid */}
+            {/* Gauges */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Posture Stability</div>
-                <div className="text-2xl font-black text-white font-mono">
-                  {liveMetrics.postureStability}<span className="text-xs text-slate-500">/100</span>
-                </div>
-                <div className="text-[10px] text-[#e2f939] font-bold">Optimal alignment</div>
-              </div>
+              {(activeMode === 'batting' || activeMode === 'bowling') && (
+                <>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Posture Stability</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.postureStability}<span className="text-xs text-slate-500">/100</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Optimal alignment</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Center of Mass</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.balance}<span className="text-xs text-slate-500">/100</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Steady base</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Hip-Shoulder Sep</div>
+                    <div className="text-2xl font-black text-[#e2f939] font-mono">{liveMetrics.hipShoulderSep}°</div>
+                    <div className="text-[10px] text-slate-400 font-medium">Strong torque</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Head Eye-Line</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.headStability}<span className="text-xs text-slate-500">/100</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Zero lateral drift</div>
+                  </div>
+                </>
+              )}
 
-              <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Center of Mass</div>
-                <div className="text-2xl font-black text-white font-mono">
-                  {liveMetrics.balance}<span className="text-xs text-slate-500">/100</span>
-                </div>
-                <div className="text-[10px] text-[#e2f939] font-bold">Steady base</div>
-              </div>
+              {activeMode === 'ball_speed' && (
+                <>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Peak Velocity</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.estBallSpeed}<span className="text-xs text-slate-500"> km/h</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Maximum release speed</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Release Height</div>
+                    <div className="text-2xl font-black text-[#e2f939] font-mono">{liveMetrics.releaseHeight}<span className="text-xs text-slate-500"> m</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">High arm action</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Arm Extension</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.armExtension}<span className="text-xs text-slate-500"> m</span></div>
+                    <div className="text-[10px] text-slate-400 font-medium">Shoulder to wrist</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Center of Mass</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.balance}<span className="text-xs text-slate-500">/100</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Steady base</div>
+                  </div>
+                </>
+              )}
 
-              <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Hip-Shoulder Sep</div>
-                <div className="text-2xl font-black text-[#e2f939] font-mono">
-                  {liveMetrics.hipShoulderSep}°
-                </div>
-                <div className="text-[10px] text-slate-400 font-medium">Strong torque</div>
-              </div>
-
-              <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
-                <div className="text-[10px] text-slate-400 font-bold uppercase">Head Eye-Line</div>
-                <div className="text-2xl font-black text-white font-mono">
-                  {liveMetrics.headStability}<span className="text-xs text-slate-500">/100</span>
-                </div>
-                <div className="text-[10px] text-[#e2f939] font-bold">Zero lateral drift</div>
-              </div>
+              {activeMode === 'broad_jump' && (
+                <>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Est. Distance</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.estJumpDistance}<span className="text-xs text-slate-500"> m</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Explosive power</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Max Hip Height</div>
+                    <div className="text-2xl font-black text-[#e2f939] font-mono">{liveMetrics.jumpHeight}<span className="text-xs text-slate-500"> cm</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Vertical lift</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Landing Flexion</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.kneeFlexion}°</div>
+                    <div className="text-[10px] text-slate-400 font-medium">Shock absorption</div>
+                  </div>
+                  <div className="bg-[#061220] p-3 rounded-xl border border-white/10">
+                    <div className="text-[10px] text-slate-400 font-bold uppercase">Posture Stability</div>
+                    <div className="text-2xl font-black text-white font-mono">{liveMetrics.postureStability}<span className="text-xs text-slate-500">/100</span></div>
+                    <div className="text-[10px] text-[#e2f939] font-bold">Landing control</div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Specific Angles and Ratios */}
             <div className="space-y-2 text-xs pt-1">
               <div className="flex justify-between py-1 border-b border-white/10 text-slate-300">
                 <span className="text-slate-400">Stance Base Ratio (vs Shoulder):</span>
-                <span className="font-mono font-bold text-white">{liveMetrics.stanceRatio}x (Optimal: 1.15-1.25x)</span>
+                <span className="font-mono font-bold text-white">{liveMetrics.stanceRatio}x (Optimal: 1.50-2.20x)</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/10 text-slate-300">
                 <span className="text-slate-400">Front Knee Flexion Angle:</span>

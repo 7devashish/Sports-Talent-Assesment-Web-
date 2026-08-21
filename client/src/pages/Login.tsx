@@ -46,51 +46,6 @@ export const Login: React.FC<LoginProps> = ({ onSuccess, onNavigateRegister }) =
 
   return (
     <div className="max-w-md mx-auto py-12 px-4">
-      {/* Judge Quick Access Banner */}
-      <div className="mb-6 p-4 rounded-2xl bg-[#0b1b33] border border-white/15 text-xs">
-        <div className="flex items-center gap-2 text-[#e2f939] font-black uppercase text-[11px] mb-2 tracking-wider">
-          <Sparkles className="w-4 h-4 text-[#e2f939]" />
-          <span>Hackathon Judge 1-Click Instant Login</span>
-        </div>
-        <p className="text-slate-400 mb-3 text-[11px]">
-          Select any pre-configured profile to test with rich stats, physical tests & CV telemetry:
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('player')}
-            className="px-3 py-2.5 rounded-xl bg-[#061220] hover:bg-white/10 text-left border border-white/10 hover:border-[#e2f939] transition-all text-xs cursor-pointer"
-          >
-            <div className="font-extrabold text-white">🏏 Rahul Sharma</div>
-            <div className="text-[10px] text-[#e2f939] font-bold">Batter (88 Pot)</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('fast_bowler')}
-            className="px-3 py-2.5 rounded-xl bg-[#061220] hover:bg-white/10 text-left border border-white/10 hover:border-[#e2f939] transition-all text-xs cursor-pointer"
-          >
-            <div className="font-extrabold text-white">⚡ Vikram Rathore</div>
-            <div className="text-[10px] text-[#e2f939] font-bold">Pacer 141 km/h</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('all_rounder')}
-            className="px-3 py-2.5 rounded-xl bg-[#061220] hover:bg-white/10 text-left border border-white/10 hover:border-[#e2f939] transition-all text-xs cursor-pointer"
-          >
-            <div className="font-extrabold text-white">🌀 Ananya Patel</div>
-            <div className="text-[10px] text-[#e2f939] font-bold">All-Rounder</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleDemoLogin('scout')}
-            className="px-3 py-2.5 rounded-xl bg-[#061220] hover:bg-white/10 text-left border border-white/10 hover:border-sky-400 transition-all text-xs cursor-pointer"
-          >
-            <div className="font-extrabold text-white">🔍 Rajesh Dravid</div>
-            <div className="text-[10px] text-sky-400 font-bold">Scout / Coach</div>
-          </button>
-        </div>
-      </div>
-
       <GlassCard className="p-8 bg-[#0b1b33] border-white/15">
         <div className="text-center mb-6">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-[#e2f939] text-[#061220] flex items-center justify-center font-black mb-3 shadow-sm">
