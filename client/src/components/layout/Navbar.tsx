@@ -10,7 +10,8 @@ import {
   ChevronDown,
   Sparkles,
   Layers,
-  ArrowUpRight
+  ArrowUpRight,
+  Bot
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
@@ -30,7 +31,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
   return (
     <header className="sticky top-0 z-50 bg-[#061220]/95 backdrop-blur-md border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div
@@ -119,6 +120,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             >
               <Layers className="w-3.5 h-3.5" />
               Compare
+            </button>
+
+            <button
+              onClick={() => setCurrentTab('alpha-q')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+                currentTab === 'alpha-q'
+                  ? 'bg-white/10 text-white border border-white/20'
+                  : 'text-slate-300 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <div className="w-4 h-4 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                <img src="/alpha-q-logo.jpg" alt="AQ" className="w-full h-full object-cover scale-[1.35]" />
+              </div>
+              Alpha-Q
             </button>
           </nav>
 

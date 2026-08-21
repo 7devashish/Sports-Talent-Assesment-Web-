@@ -13,6 +13,7 @@ import { Compare } from './pages/Compare';
 import { Profile } from './pages/Profile';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { AlphaQ } from './pages/AlphaQ';
 import { useStore } from './store/useStore';
 
 export function App() {
@@ -88,6 +89,8 @@ export function App() {
         {currentTab === 'compare' && (
           <Compare initialPlayerIds={compareIds.length >= 2 ? compareIds : undefined} />
         )}
+
+        {currentTab === 'alpha-q' && <AlphaQ />}
 
         {currentTab === 'profile' && <Profile />}
 

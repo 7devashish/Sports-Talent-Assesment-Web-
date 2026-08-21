@@ -13,6 +13,7 @@ const physicalRoutes = require('./routes/physical');
 const assessmentRoutes = require('./routes/assessments');
 const reportRoutes = require('./routes/reports');
 const coachRoutes = require('./routes/coach');
+const aiRoutes = require('./routes/ai');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -43,6 +44,7 @@ app.use('/api/physical', physicalRoutes);
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/coach', coachRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Global Error Handler
 app.use((err, req, res, next) => {
