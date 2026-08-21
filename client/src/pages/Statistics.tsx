@@ -141,32 +141,6 @@ export const Statistics: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [importType, setImportType] = useState<'batting' | 'bowling'>('batting');
 
-  const [cricbuzzMatchId, setCricbuzzMatchId] = useState('');
-  const [cricbuzzPlayerId, setCricbuzzPlayerId] = useState('');
-  const [isSyncing, setIsSyncing] = useState(false);
-
-  const handleCricbuzzSync = async () => {
-    if (!cricbuzzMatchId || !cricbuzzPlayerId) {
-      alert('Please enter both Cricbuzz Match ID and Player ID');
-      return;
-    }
-    setIsSyncing(true);
-    try {
-      await api.post('/cricbuzz/ingest-scorecard', { matchId: cricbuzzMatchId });
-      await api.post('/cricbuzz/link-player', { starqPlayerId: playerId, cricbuzzPlayerId });
-      setSavedSuccess(true);
-      setTimeout(() => {
-        setSavedSuccess(false);
-        window.location.reload();
-      }, 1500);
-    } catch (err: any) {
-      console.error('Cricbuzz sync failed', err);
-      alert('Failed to sync from Cricbuzz API. ' + (err.response?.data?.error || err.message));
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
   const handleImportClick = (type: 'batting' | 'bowling') => {
     setImportType(type);
     if (fileInputRef.current) {
@@ -278,46 +252,12 @@ export const Statistics: React.FC = () => {
         </div>
       </div>
 
-      {/* Cricbuzz Integration */}
-      <GlassCard className="p-4 bg-[#061220]/50 border-white/10">
-        <div className="flex flex-col sm:flex-row sm:items-end gap-4">
-          <div className="flex-1">
-            <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Cricbuzz Match ID</label>
-            <input
-              type="text"
-              placeholder="e.g. 101416"
-              value={cricbuzzMatchId}
-              onChange={(e) => setCricbuzzMatchId(e.target.value)}
-              className="w-full p-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs focus:border-[#e2f939] focus:outline-none transition-colors"
-            />
+        {savedSuccess && (
+          <div className="p-3.5 rounded-xl bg-[#e2f939]/15 border border-[#e2f939]/30 text-[#e2f939] text-xs font-bold flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Statistics updated successfully! ML Talent Model recalculation complete.</span>
           </div>
-          <div className="flex-1">
-            <label className="block text-slate-400 mb-1 font-bold uppercase text-[10px]">Cricbuzz Player ID</label>
-            <input
-              type="text"
-              placeholder="e.g. 1413"
-              value={cricbuzzPlayerId}
-              onChange={(e) => setCricbuzzPlayerId(e.target.value)}
-              className="w-full p-2 rounded-lg bg-black/40 border border-white/10 text-white text-xs focus:border-[#e2f939] focus:outline-none transition-colors"
-            />
-          </div>
-          <button
-            onClick={handleCricbuzzSync}
-            disabled={isSyncing}
-            className="px-4 py-2 rounded-lg text-xs font-bold bg-[#e2f939] hover:bg-[#d0e625] text-[#061220] transition-colors disabled:opacity-50 flex items-center gap-2"
-          >
-            <Database className="w-4 h-4" />
-            {isSyncing ? 'Syncing...' : 'Sync from Cricbuzz'}
-          </button>
-        </div>
-      </GlassCard>
-
-      {savedSuccess && (
-        <div className="p-3.5 rounded-xl bg-[#e2f939]/15 border border-[#e2f939]/30 text-[#e2f939] text-xs font-bold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4" />
-          <span>Statistics updated successfully! ML Talent Model recalculation complete.</span>
-        </div>
-      )}
+        )}
 
       {/* Tabs */}
       <div className="flex items-center gap-2 border-b border-white/10 pb-3">
