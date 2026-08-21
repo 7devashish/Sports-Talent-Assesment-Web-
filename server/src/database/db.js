@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const initSqlJs = require('sql.js');
 
-const DB_PATH = path.join(__dirname, 'starq.sqlite');
+const DB_PATH = process.env.SQLITE_DB_PATH || path.join(__dirname, 'starq.sqlite');
 const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
 
 let dbInstance = null;
